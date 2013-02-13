@@ -10,8 +10,8 @@ Requirements
 
 This cookbook has dependencies on the following cookbooks:
 
- * apt
- * yum::epel
+ * [apt](https://github.com/opscode-cookbooks/apt)
+ * [yum::epel](https://github.com/opscode-cookbooks/yum)
 
 ## Platforms:
 
