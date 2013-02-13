@@ -33,7 +33,7 @@ Usage
  1. Include `recipe[serverdensity]` in a run list to implicly run `recipe[serverdensity::install]`
 
  2. Then:
-  * Override the attribute on a [higher level](http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence) (*recommended*)
+  * Override the attribute on a [higher level](http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence) *recommended*
   * **or** change the `node['serverdensity']['agent_key']` attribute to your Server Density agent key
 
 References
