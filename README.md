@@ -31,7 +31,8 @@ Usage
 =====
 
  1. Include `recipe[serverdensity]` in a run list to implicly run `recipe[serverdensity::install]` and `recipe[serverdensity::server-monitor]`
- 2.
+
+ 2. Then:
   * change the `node['serverdensity']['agent_key']` attribute to your Server Density agent key
   * **or** override the attribute on a [higher level](http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence)
 
