@@ -10,29 +10,31 @@ Requirements
 
 This cookbook has dependencies on the following cookbooks:
 
+ * apt
+ * yum::epel
+
 ## Platforms:
 
-* Ubuntu
-* Debian
-* RHEL
-* CentOS
-* Fedora
+ * Ubuntu
+ * Debian
+ * RHEL
+ * CentOS
+ * Fedora
 
 Attributes
 ==========
 
-* `node['serverdensity']['repository_key']` - The ServerDensity repository key, defaults to "boxedice-public.key"
-* `node['serverdensity']['agent_key']` - Your ServerDensity agent key
-* `node['serverdensity']['sd_url']` - Your ServerDensity subdomain
+ * `node['serverdensity']['agent_key']` - Your Server Density agent key
+ * `node['serverdensity']['sd_url']` - Your Server Density subdomain, prefixed with either `http://` or `https://`
 
 Usage
 =====
 
- 1. Include `recipe[serverdensity]` in a run list to implicly run `recipe[serverdensity::install]` and `recipe[serverdensity::server-monitor]`
+ 1. Include `recipe[serverdensity]` in a run list to implicly run `recipe[serverdensity::install]`
 
  2. Then:
-  * change the `node['serverdensity']['agent_key']` attribute to your Server Density agent key
-  * **or** override the attribute on a [higher level](http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence)
+  * Override the attribute on a [higher level](http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence) (*recommended*)
+  * **or** change the `node['serverdensity']['agent_key']` attribute to your Server Density agent key
 
 References
 ==========
@@ -40,7 +42,6 @@ References
  * [Server Density home page](http://www.serverdensity.com/)
  * [akatz/chef-serverdensity](https://github.com/akatz/chef-serverdensity)
  * [Jonty/chef-serverdensity](https://github.com/Jonty/chef-serverdensity)
- * ["newrelic" cookbook by escapestudios on github](https://github.com/escapestudios/chef-newrelic)
 
 
 License and Authors
