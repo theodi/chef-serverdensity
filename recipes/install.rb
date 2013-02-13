@@ -20,6 +20,7 @@ when "debian", "ubuntu"
   execute "serverdensity-apt-get-update" do
     command "apt-get update"
     action :nothing
+
   end
 
 when "redhat", "centos", "fedora", "scientific", "amazon"
@@ -29,6 +30,7 @@ when "redhat", "centos", "fedora", "scientific", "amazon"
     name "Server Density"
     description "Server Density sd-agent"
     url "https://www.serverdensity.com/downloads/linux/redhat/" 
+    key_url "https://www.serverdensity.com/downloads/boxedice-public.key"
     action :add
   end
 
