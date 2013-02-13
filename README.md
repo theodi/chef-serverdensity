@@ -3,8 +3,6 @@ Description
 
 This cookbook provides an easy way to install the [Server Density agent](https://github.com/serverdensity/sd-agent/).
 
-More information?
-
 Requirements
 ============
 
