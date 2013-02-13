@@ -1,9 +1,9 @@
-maintainer       "Avrohom Katz"
-maintainer_email "iambpentameter@gmail.com"
+maintainer       "Server Density"
+maintainer_email "hello@serverdensity.com"
 license          "MIT"
-description      "Installs/Configures Server Density"
+description      "Installs/Configures Server Density sd-agent"
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          "0.1.0"
+version          "1.0.0"
 
 supports "ubuntu"
 supports "debian"
