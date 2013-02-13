@@ -13,10 +13,7 @@ template "/etc/sd-agent/config.cfg" do
   owner "root"
   group "root"
   mode "644"
-  variables(
-    :sd_url => node[:serverdensity][:sd_url],
-    :agent_key => node[:serverdensity][:agent_key]
-  )
+  variables(node[:serverdensity])
   notifies :restart, "service[sd-agent]"
 end
 
