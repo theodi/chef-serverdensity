@@ -1,9 +1,7 @@
 Description
 ===========
 
-This cookbook provides an easy way to install the Server Density client.
-This relies on the automatic copy template feature being enabled.
-* http://support.serverdensity.com/knowledgebase/articles/70726-auto-copy-templates
+This cookbook provides an easy way to install the [Server Density agent](https://github.com/serverdensity/sd-agent/).
 
 More information?
 
@@ -32,32 +30,28 @@ Attributes
 Usage
 =====
 
-1)
-include `recipe[serverdensity]` in a run list to implicly run `recipe[serverdensity::install]` and `recipe[serverdensity::server-monitor]`
-
-2)
-	change the `node['serverdensity']['agent_key']` attribute to your
-Server Density agent key
-	--- OR ---
-	override the attribute on a higher level (http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence)
+ 1. Include `recipe[serverdensity]` in a run list to implicly run `recipe[serverdensity::install]` and `recipe[serverdensity::server-monitor]`
+ 2.
+  * change the `node['serverdensity']['agent_key']` attribute to your Server Density agent key
+  * **or** override the attribute on a [higher level](http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence)
 
 References
 ==========
 
-* [Server Density home page] (http://www.serverdensity.com/)
-* ["newrelic" cookbook by escapestudios on github] (https://github.com/escapestudios/chef-newrelic)
+ * [Server Density home page](http://www.serverdensity.com/)
+ * [akatz/chef-serverdensity](https://github.com/akatz/chef-serverdensity)
+ * [Jonty/chef-serverdensity](https://github.com/Jonty/chef-serverdensity)
+ * ["newrelic" cookbook by escapestudios on github](https://github.com/escapestudios/chef-newrelic)
 
-Changelog
-=========
-
-### 0.1.0
-    * Use a template to configure the server-monitor instead of the non-idempotent execute (Chris Griego)
 
 License and Authors
 ===================
 
-Author: Avrohom Katz<iambpentameter@gmail.com>
-Copyright: 2012
+Original Author: Avrohom Katz <iambpentameter@gmail.com>
+Modified by: Jonty Wareing <jonty@jonty.co.uk>
+Modified further by: Server Density <hello@serverdensity.com>
+
+Copyright Avrohom Katz: 2012
 
 Unless otherwise noted, all files are released under the MIT license,
 possible exceptions will contain licensing information in them.
