@@ -1,19 +1,19 @@
-Description
-===========
+# chef-serverdensity
+
+## Description
 
 This cookbook provides an easy way to install the [Server Density agent](https://github.com/serverdensity/sd-agent/).
 
-Requirements
-============
+## Requirements
 
-## Cookbooks:
+### Cookbooks:
 
 This cookbook has dependencies on the following cookbooks:
 
  * [apt](https://github.com/opscode-cookbooks/apt)
  * [yum::epel](https://github.com/opscode-cookbooks/yum)
 
-## Platforms:
+### Platforms:
 
  * Ubuntu
  * Debian
@@ -21,14 +21,12 @@ This cookbook has dependencies on the following cookbooks:
  * CentOS
  * Fedora
 
-Attributes
-==========
+## Attributes
 
  * `node['serverdensity']['agent_key']` - Your Server Density agent key
  * `node['serverdensity']['sd_url']` - Your Server Density subdomain, prefixed with either `http://` or `https://`
 
-Usage
-=====
+## Usage
 
  1. Include `recipe[serverdensity]` in a run list to implicly run `recipe[serverdensity::install]`
 
@@ -36,20 +34,20 @@ Usage
   * Override the attribute on a [higher level](http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence) *recommended*
   * **or** change the `node['serverdensity']['agent_key']` attribute to your Server Density agent key
 
-References
-==========
+## References
 
  * [Server Density home page](http://www.serverdensity.com/)
  * [akatz/chef-serverdensity](https://github.com/akatz/chef-serverdensity)
  * [Jonty/chef-serverdensity](https://github.com/Jonty/chef-serverdensity)
 
 
-License and Authors
-===================
+## Authors
 
-Original Author: Avrohom Katz <iambpentameter@gmail.com>
-Modified by: Jonty Wareing <jonty@jonty.co.uk>
-Modified further by: Server Density <hello@serverdensity.com>
+ * Original Author: Avrohom Katz <iambpentameter@gmail.com>
+ * Modified by: Jonty Wareing <jonty@jonty.co.uk>
+ * Modified further by: Server Density <hello@serverdensity.com>
+
+## License
 
 Copyright Avrohom Katz: 2012
 
