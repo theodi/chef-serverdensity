@@ -1,7 +1,5 @@
 # chef-serverdensity
 
-## Description
-
 This cookbook provides an easy way to install the [Server Density agent](https://github.com/serverdensity/sd-agent/).
 
 ## Requirements
