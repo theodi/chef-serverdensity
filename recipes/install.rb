@@ -1,3 +1,4 @@
+# ex: set tabstop=2 shiftwidth=2 expandtab:
 #
 # Cookbook Name:: serverdensity
 # Recipe:: install
@@ -5,33 +6,14 @@
 case node[:platform]
 
 when "debian", "ubuntu"
-  # Trust the Server Density GPG Key
-  # this step is required to tell apt that you trust the integrity of Server Density's apt repository
-  gpg_key_id = node[:serverdensity][:repository_key]
+  include_recipe "apt"
 
-  if gpg_key_id
-    gpg_key_url = "https://www.serverdensity.com/downloads/#{gpg_key_id}.key"
-
-    gpg_key_already_installed = "apt-key list | grep #{gpg_key_id}"
-
-    if gpg_key_url
-      execute "serverdensity-add-gpg-key" do
-        command "wget -O - #{gpg_key_url} | apt-key add -"
-        notifies :run, "execute[serverdensity-apt-get-update]", :immediately
-        not_if gpg_key_already_installed
-      end
-    end
-  end
-
-  # Configure the Server Density apt repository
-  local_file = "/etc/apt/sources.list.d/sd-agent.list"
-
-  cookbook_file "#{local_file}" do
-    owner "root"
-    group "root"
-    mode 0644
-    notifies :run, "execute[serverdensity-apt-get-update]", :immediately
-    action :create_if_missing
+  apt_repository "serverdensity" do
+    key "https://www.serverdensity.com/downloads/boxedice-public.key"
+    uri "https://www.serverdensity.com/downloads/linux/deb"
+    distribution "all"
+    components ["main"]
+    action :add
   end
 
   # Update the local package list
@@ -40,24 +22,34 @@ when "debian", "ubuntu"
     action :nothing
   end
 
-when "redhat", "centos", "fedora"
-  # Install the sd-agent package, which configures a new package repository for yum
-  if node[:kernel][:machine] == "x86_64"
-    machine = "x86_64"
-  else
-    machine = "i386"
+when "redhat", "centos", "fedora", "scientific", "amazon"
+  include_recipe "yum::epel"
+
+  yum_repository "serverdensity" do
+    name "Server Density"
+    description "Server Density sd-agent"
+    url "https://www.serverdensity.com/downloads/linux/redhat/" 
+    action :add
   end
 
-  local_file = "/etc/yum.repos.d/serverdensity.repo"
+end
 
-  cookbook_file "#{local_file}" do
-    owner "root"
-    group "root"
-    mode 0644
-    action :create_if_missing
-  end
+package "sd-agent" do
+  action :install
+end
 
-  package "sd-agent" do
-    action :install
-  end
+# Configure your Server Density agent key
+template "/etc/sd-agent/config.cfg" do
+  source "config.cfg.erb"
+  owner "root"
+  group "root"
+  mode "644"
+  variables(node[:serverdensity])
+  notifies :restart, "service[sd-agent]"
+end
+
+service "sd-agent" do
+  supports :start => true, :stop => true, :restart => true
+  # Starts the service if it's not running and enables it to start at system boot time
+  action [:enable, :start]
 end
