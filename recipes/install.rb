@@ -5,8 +5,8 @@
 case node[:platform]
 
 when "debian", "ubuntu"
-  #trust the Server Density GPG Key
-  #this step is required to tell apt that you trust the integrity of Server Density's apt repository
+  # Trust the Server Density GPG Key
+  # this step is required to tell apt that you trust the integrity of Server Density's apt repository
   gpg_key_id = node[:serverdensity][:repository_key]
 
   if gpg_key_id
@@ -23,7 +23,7 @@ when "debian", "ubuntu"
     end
   end
 
-  #configure the Server Density apt repository
+  # Configure the Server Density apt repository
   local_file = "/etc/apt/sources.list.d/sd-agent.list"
 
   cookbook_file "#{local_file}" do
@@ -34,14 +34,14 @@ when "debian", "ubuntu"
     action :create_if_missing
   end
 
-  #update the local package list
+  # Update the local package list
   execute "serverdensity-apt-get-update" do
     command "apt-get update"
     action :nothing
   end
 
 when "redhat", "centos", "fedora"
-  #install the sd-agent package, which configures a new package repository for yum
+  # Install the sd-agent package, which configures a new package repository for yum
   if node[:kernel][:machine] == "x86_64"
     machine = "x86_64"
   else
