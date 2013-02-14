@@ -40,6 +40,7 @@ when 1..2
     data = {
       'name' => node[:node_name],
       'hostName' => node[:hostname],
+      'notes' => 'Created automatically by chef-serverdensity',
       'group' => group(node)
     }
 

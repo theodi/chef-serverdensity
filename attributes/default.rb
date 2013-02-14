@@ -2,12 +2,27 @@
 # Cookbook Name:: serverdensity
 # Attributes:: default
 
-default['serverdensity']['agent_key'] = "CHANGE_ME"
 default['serverdensity']['sd_url'] = "CHANGE_ME"
 
-###################
-# Advanced config #
-###################
+# You must set agent_key unless you want to use the API to query by hostname
+# or create a new device if not found (see below)
+default['serverdensity']['agent_key'] = nil
+
+#########################
+# API config (optional) #
+#########################
+
+# The version of the API to use
+default['serverdensity']['api_version'] = '1.4'
+
+# Only set username and password if you wish to use the API rather than
+# setting agent_key
+default['serverdensity']['api_username'] = nil
+default['serverdensity']['api_password'] = nil
+
+##############################
+# Advanced config (optional) #
+##############################
 
 # Only change this to a path if you want plugins, will be ignored otherwise
 default['serverdensity']['plugin_dir'] = ""
