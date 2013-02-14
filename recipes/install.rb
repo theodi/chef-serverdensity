@@ -26,11 +26,17 @@ when "debian", "ubuntu"
 when "redhat", "centos", "fedora", "scientific", "amazon"
   include_recipe "yum::epel"
 
+  yum_key "RPM-GPG-KEY-serverdensity" do
+    url "https://www.serverdensity.com/downloads/boxedice-public.key"
+    action :add
+  end
+
   yum_repository "serverdensity" do
     name "Server Density"
     description "Server Density sd-agent"
     url "https://www.serverdensity.com/downloads/linux/redhat/" 
-    key_url "https://www.serverdensity.com/downloads/boxedice-public.key"
+    key "RPM-GPG-KEY-serverdensity"
+    enabled 1
     action :add
   end
 
