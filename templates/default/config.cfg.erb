@@ -85,3 +85,10 @@ pidfile_directory: <%= @pidfile_directory %>
 
 logging_level: <%= @logging_level %>
 <% end %>
+
+<% if !@plugin_options.empty? %>
+# Plugin options
+<% @plugin_options.each_pair do |name, value| %>
+<%= name %> = <%= value %>
+<% end %>
+<% end %>

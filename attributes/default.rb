@@ -48,4 +48,7 @@ default['serverdensity']['tmp_directory'] = nil
 default['serverdensity']['pidfile_directory'] = nil
 
 # Logging level, default[' to INFO if not set
-default['.serverdensity']['logging_level'] = nil
+default['serverdensity']['logging_level'] = nil
+
+# If you want to configure any plugin options add them here
+default['serverdensity']['plugin_options'] = {}
