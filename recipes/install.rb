@@ -32,7 +32,7 @@ when "redhat", "centos", "fedora", "scientific", "amazon"
   end
 
   yum_repository "serverdensity" do
-    name "Server Density"
+    name "serverdensity"
     description "Server Density sd-agent"
     url "https://www.serverdensity.com/downloads/linux/redhat/" 
     key "RPM-GPG-KEY-serverdensity"
