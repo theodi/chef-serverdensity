@@ -20,6 +20,9 @@ default['serverdensity']['api_version'] = '1.4'
 default['serverdensity']['api_username'] = nil
 default['serverdensity']['api_password'] = nil
 
+# Only set this if you're using v2 of the API
+default['serverdensity']['api_v2_token'] = nil
+
 ##############################
 # Advanced config (optional) #
 ##############################

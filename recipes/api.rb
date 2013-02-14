@@ -25,6 +25,15 @@ end
 case Float(api_version)
 
 when 1..2
+
+
+  if node['serverdensity']['api_username'].nil?
+    Chef::Log.fatal("No Server Density api_username set, either set this or set agent_key")
+  end
+  if node['serverdensity']['api_password'].nil?
+    Chef::Log.fatal("No Server Density api_password set, either set this or set agent_key")
+  end
+
   base_url = "https://api.serverdensity.com/#{ api_version }/"
   headers = {
     "Authorization" => "Basic #{ node['serverdensity']['api_username'] }:#{ node['serverdensity']['api_password'] }"
@@ -61,5 +70,9 @@ when 1..2
   node['serverdensity']['agent_key'] = agent_key
 
 when 2..3
+
+  if node['serverdensity']['api_v2_token'].nil?
+    Chef::Log.fatal("No Server Density OAuth2 token (api_v2_token) set, either set this or set agent_key")
+  end
 
 end

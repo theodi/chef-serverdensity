@@ -3,6 +3,11 @@
 # Cookbook Name:: serverdensity
 # Recipe:: install
 
+if node['serverdensity']['agent_key'].nil?
+  # No agent key provided, try the API
+  include_recipe 'serverdensity::api'
+end
+
 case node[:platform]
 
 when "debian", "ubuntu"
