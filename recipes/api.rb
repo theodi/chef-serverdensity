@@ -22,10 +22,17 @@ def group(node)
     end
 end
 
+def form_encode(data)
+    parts = []
+    data.each_pair do |name, value|
+      parts.push(URI::encode("#{ name }=#{ value }"))
+    end
+    parts.join("&")
+end
+
 case Float(api_version)
 
 when 1..2
-
 
   if node['serverdensity']['api_username'].nil?
     Chef::Log.fatal("No Server Density api_username set, either set this or set agent_key")
@@ -34,12 +41,12 @@ when 1..2
     Chef::Log.fatal("No Server Density api_password set, either set this or set agent_key")
   end
 
-  base_url = "https://api.serverdensity.com/#{ api_version }/"
+  base_url = "#{ node['serverdensity']['api_v1_base_url'] }#{ api_version }/"
   headers = {
     "Authorization" => "Basic #{ node['serverdensity']['api_username'] }:#{ node['serverdensity']['api_password'] }"
   }
   client = Chef::REST::RESTRequest.new("GET", "#{ base_url }devices/getByHostName?hostName=#{ node[:hostname] }", nil, headers)
-  response = client.call {|r| r.read_body}  
+  response = client.call {|r| r.read_body}
   device = Chef::JSONCompat.from_json(response.body.chomp)
 
   if device['status'] == 2
@@ -53,14 +60,8 @@ when 1..2
       'group' => group(node)
     }
 
-    data_array = []
-    data.each_pair do |name, value|
-      data_array.push(URI::encode("#{ name }=#{ value }"))
-    end
-    data_str = data_array.join("&")
-
-    client = Chef::REST::RESTRequest.new("POST", "#{ base_url }devices/add", data_str, headers)
-    response = client.call {|r| r.read_body}  
+    client = Chef::REST::RESTRequest.new("POST", "#{ base_url }devices/add", form_encode(data), headers)
+    response = client.call {|r| r.read_body}
     device = Chef::JSONCompat.from_json(response.body.chomp)
   end
 
@@ -70,9 +71,36 @@ when 1..2
   node['serverdensity']['agent_key'] = agent_key
 
 when 2..3
+  
+  tokens = node['serverdensity']['api_v2_token']
 
-  if node['serverdensity']['api_v2_token'].nil?
+  if token.nil?
     Chef::Log.fatal("No Server Density OAuth2 token (api_v2_token) set, either set this or set agent_key")
   end
+
+  base_url = "#{ node['serverdensity']['api_v2_base_url'] }/"
+  client = Chef::REST::RESTRequest.new("GET", "#{ base_url }inventory/devices/{ node[:hostname] }/byhostname?token=#{ token }")
+  response = client.call {|r| r.read_body}
+
+  if Integer(response.headers.status) >= 300
+    Chef::Log.info("Couldn't find device, creating a new one")
+
+    # Create new device
+    data = {
+      'name' => node[:node_name],
+      'hostname' => node[:hostname],
+      'group' => group(node)
+    }
+
+    client = Chef::REST::RESTRequest.new("POST", "#{ base_url }inventory/devices/", form_encode(data))
+    response = client.call {|r| r.read_body}
+
+  end
+
+  device = Chef::JSONCompat.from_json(response.body.chomp)
+  agent_key = device['agentKey']
+  Chef::Log.info("Using agent key '#{ agent_key }'")
+
+  node['serverdensity']['agent_key'] = agent_key
 
 end

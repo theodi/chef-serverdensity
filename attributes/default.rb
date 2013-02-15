@@ -23,6 +23,9 @@ default['serverdensity']['api_password'] = nil
 # Only set this if you're using v2 of the API
 default['serverdensity']['api_v2_token'] = nil
 
+default['serverdensity']['api_v1_base_url'] = 'https://api.serverdensity.com/'
+default['serverdensity']['api_v2_base_url'] = 'https://api.serverdensity.io/'
+
 ##############################
 # Advanced config (optional) #
 ##############################
