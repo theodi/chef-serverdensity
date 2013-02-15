@@ -65,7 +65,7 @@ if !template_variables.plugin_options.empty?
   end
 end
 
-# Configure your Server Density agent key
+# Configure the sd-agent config
 template "/etc/sd-agent/config.cfg" do
   source "config.cfg.erb"
   owner "root"
