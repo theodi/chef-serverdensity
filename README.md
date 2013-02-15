@@ -61,10 +61,8 @@ host = localhost
  1. Include `recipe[serverdensity]` in a run list to implicly run `recipe[serverdensity::install]`
 
  2. Then:
-  * Override the `node['serverdensity']['agent_key']` attribute on a [higher level](http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence) *recommended*
-  * **or** use the API (see below) to query for devices matching the node's hostname or create a new one if not found.
-
-## Using the Server Density API v1
+  * Override the `node['serverdensity']['agent_key']` attribute on a [higher level](http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence). *recommended*
+  * **or** use the API to query for devices matching the node's hostname or create a new one if not found, by setting the [config options](#optional-api-config).
 
 
 ## References
