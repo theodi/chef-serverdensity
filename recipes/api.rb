@@ -79,10 +79,17 @@ when 2..3
   end
 
   base_url = "#{ node['serverdensity']['api_v2_base_url'] }/"
-  client = Chef::REST::RESTRequest.new("GET", "#{ base_url }inventory/devices/{ node[:hostname] }/byhostname?token=#{ token }")
-  response = client.call {|r| r.read_body}
+  filter = {
+    'type' => 'device',
+    'hostname' => node[:hostname]
+  }
+  filter_json = Chef::JSONCompat.to_json(filter)
 
-  if Integer(response.headers.status) >= 300
+  client = Chef::REST::RESTRequest.new("GET", "#{ base_url }inventory/resources/?filter='#{ filter_json }'&token=#{ token }")
+  response = client.call {|r| r.read_body}
+  devices = Chef::JSONCompat.from_json(response.body.chomp)
+
+  if Integer(response.headers.status) >= 300 or devices.length == 0
     Chef::Log.info("Couldn't find device, creating a new one")
 
     # Create new device
@@ -92,12 +99,13 @@ when 2..3
       'group' => group(node)
     }
 
-    client = Chef::REST::RESTRequest.new("POST", "#{ base_url }inventory/devices/", form_encode(data))
+    client = Chef::REST::RESTRequest.new("POST", "#{ base_url }inventory/devices/?token=#{ token }", form_encode(data))
     response = client.call {|r| r.read_body}
 
+  else
+    device = devices[0]
   end
 
-  device = Chef::JSONCompat.from_json(response.body.chomp)
   agent_key = device['agentKey']
   Chef::Log.info("Using agent key '#{ agent_key }'")
 
