@@ -62,7 +62,7 @@ default['serverdensity']['rabbitmq_user'] = nil
 # Will default['to guest
 default['serverdensity']['rabbitmq_pass'] = nil
 
-# temp directory location, otherwise system default['is used if not set
+# temp directory location, otherwise system default is used if not set
 default['serverdensity']['tmp_directory'] = nil
 
 # PID file directory, otherwise stored in temp if not set
