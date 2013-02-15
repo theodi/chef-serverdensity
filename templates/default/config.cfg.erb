@@ -86,9 +86,18 @@ pidfile_directory: <%= @pidfile_directory %>
 logging_level: <%= @logging_level %>
 <% end %>
 
-<% if !@plugin_options.empty? %>
+<% if !@main_plugin_options.empty? %>
 # Plugin options
-<% @plugin_options.each_pair do |name, value| %>
+<% @main_plugin_options.each_pair do |name, value| %>
 <%= name %> = <%= value %>
+<% end %>
+<% end %>
+
+<% if !@section_plugin_options.empty? %>
+<% @_section_plugin_options.each_pair do |section, options| %>
+[<%= section %>]
+<% options.each_pair do |name, value| %>
+<%= name %> = <%= value %>
+<% end %>
 <% end %>
 <% end %>

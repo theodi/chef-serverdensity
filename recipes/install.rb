@@ -51,13 +51,27 @@ package "sd-agent" do
   action :install
 end
 
+template_variables = node['serverdensity']
+template_variables.main_plugin_options = {}
+template_variables.section_plugin_options = {}
+
+if !template_variables.plugin_options.empty?
+  template_variables.plugin_options.each_pair do |name, value|
+    if value.is_a?(Hash)
+      template_variables.section_plugin_options[name] = value
+    else
+      template_variables.main_plugin_options[name] = value
+    end
+  end
+end
+
 # Configure your Server Density agent key
 template "/etc/sd-agent/config.cfg" do
   source "config.cfg.erb"
   owner "root"
   group "root"
   mode "644"
-  variables(node[:serverdensity])
+  variables(template_variables)
   notifies :restart, "service[sd-agent]"
 end
 

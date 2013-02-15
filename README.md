@@ -49,7 +49,7 @@ This cookbook has dependencies on the following cookbooks:
  * `node['serverdensity']['rabbitmq_pass']` - Password to authenticate to the RabbitMQ management API, required if `rabbitmq_status_url` is set
  * `node['serverdensity']['tmp_directory']` - Override where the agent stores temporary files, system default tmp will be used if not set
  * `node['serverdensity']['pidfile_directory']` - Override where the agent stores it's PID file, temp dir (above or system default) is used if not set
- * `node['serverdensity']['plugin_options']` - A hash of optional named plugin options if you have agent plugins you want to configure, sub-hashes will be generated into sections e.g. `{"Beanstalk"=>{"host"=>"localhost"}}` becomes:
+ * `node['serverdensity']['plugin_options']` - A hash of optional named plugin options if you have agent plugins you want to configure, simple key-values will be added to the `[Main]` section of the config while sub-hashes will be generated into sections e.g. `{"Beanstalk"=>{"host"=>"localhost"}}` becomes:
 
 ```ini
 [Beanstalk]
