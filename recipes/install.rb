@@ -55,7 +55,7 @@ template_variables = node['serverdensity']
 template_variables.main_plugin_options = {}
 template_variables.section_plugin_options = {}
 
-if !template_variables.plugin_options.empty?
+if !template_variables.plugin_options.nil? and !template_variables.plugin_options.empty?
   template_variables.plugin_options.each_pair do |name, value|
     if value.is_a?(Hash)
       template_variables.section_plugin_options[name] = value
