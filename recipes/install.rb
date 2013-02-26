@@ -3,6 +3,8 @@
 # Cookbook Name:: serverdensity
 # Recipe:: install
 
+require('chef/json_compat')
+
 if node['serverdensity']['agent_key'].nil?
   # No agent key provided, try the API
   include_recipe 'serverdensity::api'
@@ -51,16 +53,21 @@ package "sd-agent" do
   action :install
 end
 
-template_variables = node['serverdensity']
-template_variables.main_plugin_options = {}
-template_variables.section_plugin_options = {}
+if !node['serverdensity'].respond_to?('to_hash')
+  # This is a massive hack so we can get an entire mutable hash out of the attributes in chef 11
+  template_variables = Chef::JSONCompat.from_json(node['serverdensity'].to_json)
+else
+  template_variables = node['serverdensity'].to_hash
+end
+template_variables['main_plugin_options'] = {}
+template_variables['section_plugin_options'] = {}
 
-if !template_variables.plugin_options.nil? and !template_variables.plugin_options.empty?
-  template_variables.plugin_options.each_pair do |name, value|
+if !template_variables['plugin_options'].nil? and !template_variables['plugin_options'].empty?
+  template_variables['plugin_options'].each_pair do |name, value|
     if value.is_a?(Hash)
-      template_variables.section_plugin_options[name] = value
+      template_variables['section_plugin_options'][name] = value
     else
-      template_variables.main_plugin_options[name] = value
+      template_variables['main_plugin_options'][name] = value
     end
   end
 end
