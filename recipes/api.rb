@@ -71,7 +71,6 @@ when 1..2
     exit 1
   end
 
-  puts device.to_json
   agent_key = device['data']['agentKey']
   Chef::Log.info("Using agent key '#{ agent_key }'")
 
