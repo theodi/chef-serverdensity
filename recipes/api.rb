@@ -84,13 +84,16 @@ when 2..3
 
   base_url = "#{ node['serverdensity']['api_v2_base_url'] }/"
   filter = {
-    'type' => 'device',
-    'hostname' => node[:hostname]
+    :type => 'device',
+    :hostname => node[:hostname]
   }
-  filter_json = Chef::JSONCompat.to_json(filter)
 
   begin
-    devices = Chef::JSONCompat.from_json(RestClient.get("#{ base_url }inventory/resources/?filter=#{ URI::escape(filter_json) }&token=#{ token }"))
+    query = {
+      :filter => Chef::JSONCompat.to_json(filter),
+      :token => token
+    }
+    devices = Chef::JSONCompat.from_json(RestClient.get("#{ base_url }inventory/resources/", :params => query))
   rescue => e
     Chef::Log.fatal("Unable to query for device: #{ e.response }")
     exit 1
