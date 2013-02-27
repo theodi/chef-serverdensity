@@ -72,9 +72,6 @@ when 1..2
   end
 
   agent_key = device['data']['agentKey']
-  Chef::Log.info("Using agent key '#{ agent_key }'")
-
-  node.set['serverdensity']['agent_key'] = agent_key
 
 when 2..3
   
@@ -85,37 +82,45 @@ when 2..3
     exit 1
   end
 
-#  base_url = "#{ node['serverdensity']['api_v2_base_url'] }/"
-#  filter = {
-#    'type' => 'device',
-#    'hostname' => node[:hostname]
-#  }
-#  filter_json = Chef::JSONCompat.to_json(filter)
-#
-#  client = Chef::REST::RESTRequest.new("GET", "#{ base_url }inventory/resources/?filter='#{ filter_json }'&token=#{ token }")
-#  response = client.call {|r| r.read_body}
-#  devices = Chef::JSONCompat.from_json(response.body.chomp)
-#
-#  if Integer(response.headers.status) >= 300 or devices.length == 0
-#    Chef::Log.info("Couldn't find device, creating a new one")
-#
-#    # Create new device
-#    data = {
-#      'name' => node[:node_name],
-#      'hostname' => node[:hostname],
-#      'group' => group(node)
-#    }
-#
-#    client = Chef::REST::RESTRequest.new("POST", "#{ base_url }inventory/devices/?token=#{ token }", form_encode(data))
-#    response = client.call {|r| r.read_body}
-#
-#  else
-#    device = devices[0]
-#  end
-#
-#  agent_key = device['agentKey']
-#  Chef::Log.info("Using agent key '#{ agent_key }'")
-#
-#  node['serverdensity']['agent_key'] = agent_key
+  base_url = "#{ node['serverdensity']['api_v2_base_url'] }/"
+  filter = {
+    'type' => 'device',
+    'hostname' => node[:hostname]
+  }
+  filter_json = Chef::JSONCompat.to_json(filter)
+
+  begin
+    devices = Chef::JSONCompat.from_json(RestClient.get("#{ base_url }inventory/resources/?filter=#{ URI::escape(filter_json) }&token=#{ token }"))
+  rescue => e
+    Chef::Log.fatal("Unable to query for device: #{ e.response }")
+    exit 1
+  end
+
+  if devices.length == 0
+    Chef::Log.info("Couldn't find device, creating a new one")
+
+    # Create new device
+    data = {
+      'name' => node[:node_name],
+      'hostname' => node[:hostname],
+      'group' => group(node)
+    }
+
+    begin
+      device = Chef::JSONCompat.from_json(RestClient.post("#{ base_url }inventory/devices/?token=#{ token }", data))
+    rescue => e
+      Chef::Log.fatal("Unable to create device: #{ e.response }")
+      exit 1
+    end
+
+  else
+    device = devices[0]
+  end
+
+  agent_key = device['agentKey']
 
 end
+
+Chef::Log.info("Using agent key '#{ agent_key }'")
+
+node.set['serverdensity']['agent_key'] = agent_key
