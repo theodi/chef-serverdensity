@@ -7,7 +7,6 @@
 
 require 'uri'
 require 'chef/log'
-require 'chef/config'
 require 'rest_client'
 
 api_version = node['serverdensity']['api_version']
@@ -54,7 +53,7 @@ when 1..2
 
     # Create new device
     data = {
-      :name => (Chef::Config[:node_name] or node[:hostname]),
+      :name => node.name,
       :hostName => node[:hostname],
       :notes => 'Created automatically by chef-serverdensity',
       :group => group(node)
