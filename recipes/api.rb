@@ -65,13 +65,16 @@ when 1..2
       Chef::Log.fatal("Unable to create device: #{ e.response }")
       exit 1
     end
+    agent_key = device['data']['agentKey']
 
   elsif device.code != 200
     Chef::Log.fatal("Unable to query for device: #{ device }")
     exit 1
+  else
+    Chef::Log.info("Found existing device")
+    agent_key = device['data']['device']['agentKey']
   end
 
-  agent_key = device['data']['agentKey']
 
 when 2..3
   
