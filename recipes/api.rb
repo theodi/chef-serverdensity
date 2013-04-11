@@ -79,44 +79,65 @@ when 1..2
 
 when 2..3
   
-  tokens = node['serverdensity']['api_v2_token']
+  token = node['serverdensity']['api_v2_token']
 
   if token.nil?
     Chef::Log.fatal("No Server Density OAuth2 token (api_v2_token) set, either set this or set agent_key")
     exit 1
   end
 
-#  base_url = "#{ node['serverdensity']['api_v2_base_url'] }/"
-#  filter = {
-#    'type' => 'device',
-#    'hostname' => node[:hostname]
-#  }
-#  filter_json = Chef::JSONCompat.to_json(filter)
-#
-#  client = Chef::REST::RESTRequest.new("GET", "#{ base_url }inventory/resources/?filter='#{ filter_json }'&token=#{ token }")
-#  response = client.call {|r| r.read_body}
-#  devices = Chef::JSONCompat.from_json(response.body.chomp)
-#
-#  if Integer(response.headers.status) >= 300 or devices.length == 0
-#    Chef::Log.info("Couldn't find device, creating a new one")
-#
-#    # Create new device
-#    data = {
-#      'name' => node[:node_name],
-#      'hostname' => node[:hostname],
-#      'group' => group(node)
-#    }
-#
-#    client = Chef::REST::RESTRequest.new("POST", "#{ base_url }inventory/devices/?token=#{ token }", form_encode(data))
-#    response = client.call {|r| r.read_body}
-#
-#  else
-#    device = devices[0]
-#  end
-#
-#  agent_key = device['agentKey']
-#  Chef::Log.info("Using agent key '#{ agent_key }'")
-#
-#  node['serverdensity']['agent_key'] = agent_key
+  base_url = "#{ node['serverdensity']['api_v2_base_url'] }"
+  filter = {
+    'type' => 'device',
+    'hostname' => node[:hostname]
+  }
+  filter_json = URI.escape(Chef::JSONCompat.to_json(filter))
+
+  uri = URI("#{ base_url }inventory/devices?filter=#{ filter_json }&token=#{ token }")
+  req = Net::HTTP::Get.new(uri.request_uri)
+  https = Net::HTTP.new(uri.host, uri.port)
+  https.use_ssl = true
+  https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  res = https.start { |cx| cx.request(req) }
+
+  devices = Chef::JSONCompat.from_json(res.body.chomp)
+
+
+ if Integer(res.code) >= 300 or devices.length == 0
+   Chef::Log.info("Couldn't find device, creating a new one")
+
+   if node[:node_name].nil?
+    name = node[:hostname]
+   else
+    name = node[:node_name]
+   end
+
+   # Create new device
+   data = {
+     'name' => name,
+     'hostname' => node[:hostname],
+     'group' => group(node)
+   }
+
+    uri = URI("#{ base_url }inventory/devices?token=#{ token }")
+    req = Net::HTTP::Post.new(uri.request_uri)
+
+    # Create new device
+    req.set_form_data(data)
+
+    https = Net::HTTP.new(uri.host, uri.port)
+    https.use_ssl = true
+    https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    res = https.start { |cx| cx.request(req) }
+    device = Chef::JSONCompat.from_json(res.body)
+
+ else
+   device = devices[0]
+ end
+
+ agent_key = device['agentKey']
+ Chef::Log.info("Using agent key '#{ agent_key }'")
+
+ node['serverdensity']['agent_key'] = agent_key
 
 end
