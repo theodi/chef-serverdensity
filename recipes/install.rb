@@ -4,10 +4,29 @@
 # Recipe:: install
 
 require('chef/json_compat')
+require 'rest_client'
 
 if node['serverdensity']['agent_key'].nil?
-  # No agent key provided, try the API
-  include_recipe 'serverdensity::api'
+  # no agent key, try to read it out of the
+  # file dropped in a Rackspace server
+  if File::exist?('/etc/sd-agent-key')
+    Chef::Log.info("Agent key file exists")
+    agent_key = File.read('/etc/sd-agent-key')
+    node.set['serverdensity']['agent_key'] = agent_key
+  else
+
+    # attempt to get the metadata that is set on
+    # an EC2 instance that we have created
+    begin
+      user_data = RestClient.get("http://169.254.169.254/latest/user-data")
+      agent_key = user_data.split(':').last
+      node.set['serverdensity']['agent_key'] = agent_key
+    rescue
+       # No agent key provided, try the API
+      include_recipe 'serverdensity::api'
+    end
+
+  end
 end
 
 case node[:platform]
