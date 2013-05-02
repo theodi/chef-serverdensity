@@ -53,7 +53,7 @@ when 1..2
 
     # Create new device
     data = {
-      :name => (node[:node_name] or node[:hostname]),
+      :name => node.name,
       :hostName => node[:hostname],
       :notes => 'Created automatically by chef-serverdensity',
       :group => group(node)
@@ -65,17 +65,16 @@ when 1..2
       Chef::Log.fatal("Unable to create device: #{ e.response }")
       exit 1
     end
+    agent_key = device['data']['agentKey']
 
   elsif device.code != 200
     Chef::Log.fatal("Unable to query for device: #{ device }")
     exit 1
+  else
+    Chef::Log.info("Found existing device")
+    agent_key = device['data']['device']['agentKey']
   end
 
-  puts device.to_json
-  agent_key = device['data']['agentKey']
-  Chef::Log.info("Using agent key '#{ agent_key }'")
-
-  node.set['serverdensity']['agent_key'] = agent_key
 
 when 2..3
   
@@ -141,3 +140,7 @@ when 2..3
  node['serverdensity']['agent_key'] = agent_key
 
 end
+
+Chef::Log.info("Using agent key '#{ agent_key }'")
+
+node.set['serverdensity']['agent_key'] = agent_key
