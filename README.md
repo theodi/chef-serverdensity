@@ -25,11 +25,17 @@ This cookbook has dependencies on the following cookbooks:
  * `node['serverdensity']['sd_url']` - Your Server Density subdomain, prefixed with either `http://` or `https://`, **required**
  * `node['serverdensity']['agent_key']` - Your Server Density agent key (don't set this if you want to use the API to handle querying nodes/creating nodes)
 
-### Optional API config
+### Optional API v1 config
+Use this if you're still on ServerDensity v1 and wish to use the API to create nodes (rather than auto-copy templates):
  * `node['serverdensity']['api_version']` - Server Density API version to use (if `agent_key` isn't set), *default*: `1.4`
  * `node['serverdensity']['api_v1_base_url']` - Base URL for the API (if `agent_key` isn't set), only override for testing API calls, *default*: `https://api.serverdensity.com/`
  * `node['serverdensity']['api_username']` - Username for authenticating with the v1 API (if `agent_key` isn't set)
  * `node['serverdensity']['api_password']` - Password for authenticating with the v1 API (if `agent_key` isn't set)
+
+### Optional API v2 config
+If you're using ServerDensity v2 and don't set `agent_key` you'll need to use the API to create nodes:
+ * `node['serverdensity']['api_version']` - Set to 2.0
+ * `node['serverdensity']['api_v2_token']` - Your autodeploy OAuth2 token
 
 ### Optional advanced config
 
@@ -63,6 +69,8 @@ host = localhost
  2. Then:
   * Override the `node['serverdensity']['agent_key']` attribute on a [higher level](http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence). *recommended*
   * **or** use the API to query for devices matching the node's hostname or create a new one if not found, by setting the [config options](#optional-api-config).
+
+ 3. As this cookbook depends on a few [other cookbooks](#cookbooks) it's recommended you use a library like [Berkshelf](http://berkshelf.com/), [librarian-chef](https://github.com/applicationsonline/librarian-chef) or [knife-github-cookbooks](https://github.com/websterclay/knife-github-cookbooks) to automatically manage and install them.
 
 
 ## References
