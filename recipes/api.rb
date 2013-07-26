@@ -77,7 +77,7 @@ when 1..2
 
 
 when 2..3
-  
+
   token = node['serverdensity']['api_v2_token']
 
   if token.nil?
@@ -137,7 +137,7 @@ when 2..3
  agent_key = device['agentKey']
  Chef::Log.info("Using agent key '#{ agent_key }'")
 
- node['serverdensity']['agent_key'] = agent_key
+ node.set['serverdensity']['agent_key'] = agent_key
 
 end
 
