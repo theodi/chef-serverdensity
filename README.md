@@ -35,7 +35,7 @@ Use this if you're still on ServerDensity v1 and wish to use the API to create n
 ### Optional API v2 config
 If you're using ServerDensity v2 and don't set `agent_key` you'll need to use the API to create nodes:
  * `node['serverdensity']['api_version']` - Set to 2.0
- * `node['serverdensity']['api_v2_token']` - Your autodeploy OAuth2 token
+ * `node['serverdensity']['api_v2_token']` - Your API token from Preferences > Security in Server Density.
 
 ### Optional advanced config
 
