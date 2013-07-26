@@ -25,20 +25,29 @@ This cookbook has dependencies on the following cookbooks:
  * `node['serverdensity']['sd_url']` - Your Server Density subdomain, prefixed with either `http://` or `https://`, **required**
  * `node['serverdensity']['agent_key']` - Your Server Density agent key (don't set this if you want to use the API to handle querying nodes/creating nodes)
 
-### Optional API v1 config
-Use this if you're still on ServerDensity v1 and wish to use the API to create nodes (rather than auto-copy templates):
+### API v1 config
+
+*If your account URL ends in .com you are using v1*
+
+Use this if you're still on Server Density v1 and wish to use the API to create nodes (rather than auto-copy templates):
+
  * `node['serverdensity']['api_version']` - Server Density API version to use (if `agent_key` isn't set), *default*: `1.4`
  * `node['serverdensity']['api_v1_base_url']` - Base URL for the API (if `agent_key` isn't set), only override for testing API calls, *default*: `https://api.serverdensity.com/`
  * `node['serverdensity']['api_username']` - Username for authenticating with the v1 API (if `agent_key` isn't set)
  * `node['serverdensity']['api_password']` - Password for authenticating with the v1 API (if `agent_key` isn't set)
 
 ### Optional API v2 config
-If you're using ServerDensity v2 and don't set `agent_key` you'll need to use the API to create nodes:
+
+*If your account URL ends in .io you are using v2*
+
+If you don't set `agent_key` then set these parameters and new servers will be automatically created in your account.
+
  * `node['serverdensity']['api_version']` - Set to 2.0
  * `node['serverdensity']['api_v2_token']` - Your API token from Preferences > Security in Server Density.
 
 ### Optional advanced config
 
+ * `node['serverdensity']['device_group']` - Sets the group for the device to be created in, to inherit alerts automatically.
  * `node['serverdensity']['plugin_dir']` - Sets the directory the agent looks for plugins, if left blank it is ignored
  * `node['serverdensity']['apache_status_url']` - URL to get the Apache2 status page from (e.g. `mod_status`), disabled if not set
  * `node['serverdensity']['apache_status_user']` - Username to authenticate to the Apache2 status page, required if `apache_status_url` is set
