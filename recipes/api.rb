@@ -9,7 +9,7 @@ require 'uri'
 require 'chef/log'
 require 'rest_client'
 
-api_version = node['serverdensity']['api_version']
+api_version = Float(node['serverdensity']['api_version'])
 account_name = node['serverdensity']['sd_url'].sub(/^https?:\/\//, "")
 
 Chef::Log.info("No agent key defined, querying Server Density API v#{ api_version } for host '#{ node[:hostname] }'")
@@ -22,9 +22,7 @@ def group(node)
     end
 end
 
-case Float(api_version)
-
-when 1..2
+if api_version < 2
 
   if node['serverdensity']['api_username'].nil?
     Chef::Log.fatal("No Server Density api_username set, either set this or set agent_key")
@@ -76,7 +74,7 @@ when 1..2
   end
 
 
-when 2..3
+else
 
   token = node['serverdensity']['api_v2_token']
 
