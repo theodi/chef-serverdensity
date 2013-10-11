@@ -94,7 +94,7 @@ logging_level: <%= @logging_level %>
 <% end %>
 
 <% if !@section_plugin_options.nil? and !@section_plugin_options.empty? %>
-<% @_section_plugin_options.each_pair do |section, options| %>
+<% @section_plugin_options.each_pair do |section, options| %>
 [<%= section %>]
 <% options.each_pair do |name, value| %>
 <%= name %> = <%= value %>
