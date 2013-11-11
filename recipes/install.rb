@@ -15,14 +15,23 @@ if node['serverdensity']['agent_key'].nil?
     node.set['serverdensity']['agent_key'] = agent_key
   else
 
-    # attempt to get the metadata that is set on
-    # an EC2 instance that we have created
-    begin
-      user_data = RestClient.get("http://169.254.169.254/latest/user-data")
-      agent_key = user_data.split(':').last
-      node.set['serverdensity']['agent_key'] = agent_key
-    rescue
-       # No agent key provided, try the API
+    use_api = node['serverdensity']['enable_ec2'] || false
+
+    if !use_api then
+      # attempt to get the metadata that is set on
+      # an EC2 instance that we have created
+      begin
+        user_data =  RestClient::Request.execute(:method => :get,
+                                                 :url => "http://169.254.169.254/latest/user-data",
+                                                 :timeout => 60)
+        agent_key = user_data.split(':').last
+        node.set['serverdensity']['agent_key'] = agent_key
+      rescue
+        use_api = true
+      end
+    end
+
+    if use_api then
       include_recipe 'serverdensity::api'
     end
 

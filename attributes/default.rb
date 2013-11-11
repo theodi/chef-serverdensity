@@ -73,3 +73,6 @@ default['serverdensity']['logging_level'] = nil
 
 # If you want to configure any plugin options add them here
 default['serverdensity']['plugin_options'] = {}
+
+# Enable/disable looking up meta data (e.g. agent key) from the AWS EC2 API
+default['serverdensity']['enable_ec2'] = false

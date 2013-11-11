@@ -47,6 +47,7 @@ If you don't set `agent_key` then set these parameters and new servers will be a
 
 ### Optional advanced config
 
+ * `node['serverdensity']['enable_ec2']` - If you're deploying an AWS EC2 instance from Server Density itself, using the cloud privisioning feature, if you set this to `true` the recipe will attempt to get the agent key from the internal EC2 meta data API.
  * `node['serverdensity']['device_group']` - Sets the group for the device to be created in, to inherit alerts automatically.
  * `node['serverdensity']['plugin_dir']` - Sets the directory the agent looks for plugins, if left blank it is ignored
  * `node['serverdensity']['apache_status_url']` - URL to get the Apache2 status page from (e.g. `mod_status`), disabled if not set
