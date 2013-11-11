@@ -133,8 +133,6 @@ else
  end
 
  agent_key = device['agentKey']
- Chef::Log.info("Using agent key '#{ agent_key }'")
-
  node.set['serverdensity']['agent_key'] = agent_key
 
 end

@@ -15,7 +15,7 @@ if node['serverdensity']['agent_key'].nil?
     node.set['serverdensity']['agent_key'] = agent_key
   else
 
-    use_api = node['serverdensity']['enable_ec2'] || false
+    use_api = !(node['serverdensity']['enable_ec2'] || false)
 
     if !use_api then
       # attempt to get the metadata that is set on
