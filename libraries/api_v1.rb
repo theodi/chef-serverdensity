@@ -2,23 +2,22 @@ module Chef::Recipe::ServerDensity
   module API
     class V1 < Base
 
-      def init(user, pass)
+      def initialize(version, account, user, pass)
+        super version
         @user = user
         @pass = pass
         params :account => account
       end
 
       def base_url
-        @base_url ||= "#{super}/#{version}".sub '://', "://#{URI::escape(@user)}:#{URI::escape(@pass)}@"
+        @base_url ||= "https://api.serverdensity.com/#{version}"
+          .sub '://', "://#{URI::escape(@user)}:#{URI::escape(@pass)}@"
       end
 
-      def create(group)
-        res = post '/devices/add', {
-          :group => group,
-          :hostName => node.hostname,
-          :name => node.name,
+      def create(meta)
+        res = post '/devices/add', validate(meta,
           :notes => 'Created automatically by chef-serverdensity'
-        }
+        )
 
         if res.code != 200
           Chef::Log.warn("Unable to create device on Serverdensity")
@@ -28,8 +27,8 @@ module Chef::Recipe::ServerDensity
         res.body['data']
       end
 
-      def find(filter)
-        res = get '/devices/getByHostName', :params => filter
+      def find(meta)
+        res = get '/devices/getByHostName', :params => validate(meta)
         Chef::Log.warn 'get'
         Chef::Log.warn res.body
 
@@ -44,7 +43,13 @@ module Chef::Recipe::ServerDensity
       def update(device, meta)
         nil
       end
-      
+
+      def validate(meta, default = {})
+        meta = super
+        meta[:hostName] = meta.delete(:hostname) if meta.has_key? :hostname
+        meta
+      end
+
     end
   end
 end

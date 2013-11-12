@@ -1,16 +1,11 @@
 module Chef::Recipe::ServerDensity
   module API
 
-    ACCOUNT
-
     class Base
-      attr_reader :node
       attr_reader :version
 
-      def initialize(ctx, version, *args)
-        @node = ctx.node
+      def initialize(version)
         @version = version.to_f
-        init(*args)
       end
 
       def _request(method, path, payload, options = {}, &block)
@@ -20,11 +15,7 @@ module Chef::Recipe::ServerDensity
           params
         end
 
-        req = {
-          method: method,
-          url: "#{base_url}#{path}",
-          headers: options
-        }
+        req = { method: method, url: "#{base_url}#{path}", headers: options }
         req[:payload] = payload if [:patch, :post, :put].include? method
 
         Chef::Log.warn req.inspect
@@ -54,16 +45,8 @@ module Chef::Recipe::ServerDensity
         _request :put, path, *args, &block
       end
 
-      def account
-        node.serverdensity.sd_url.sub /^https?:\/\//, ""
-      end
-
       def base_url
-        @base_url ||= begin
-          node.serverdensity.api_url[version].chomp '/'
-        rescue
-          node.serverdensity.api_url[version.to_i].chomp '/'
-        end
+        nil
       end
 
       def params(value = nil)
@@ -74,13 +57,20 @@ module Chef::Recipe::ServerDensity
           @params.merge! value
         end
       end
+
+      def validate(meta, default = {})
+        meta.each do |k, v|
+          default.update(k.downcase.to_sym => v)
+        end unless meta.nil?
+        default
+      end
     end
 
-    def self.new(ctx, version, *args)
+    def self.new(version, *args)
       case version.to_i
         when 1 then V1
         when 2 then V2
-      end .new ctx, version, *args
+      end .new version, *args
     end
 
   end

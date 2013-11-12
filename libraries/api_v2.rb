@@ -2,16 +2,17 @@ module Chef::Recipe::ServerDensity
   module API
     class V2 < Base
 
-      def init(token)
+      def initialize(version, token)
+        super version
         params :token => token
       end
 
-      def create(group)
-        res = post '/inventory/devices', {
-          group: group,
-          hostname: node.hostname,
-          name: node.name
-        }
+      def base_url
+        'https://api.serverdensity.io'
+      end
+
+      def create(meta)
+        res = post '/inventory/devices', validate(meta)
         Chef::Log.warn 'post'
         Chef::Log.warn res.body
 
@@ -23,9 +24,9 @@ module Chef::Recipe::ServerDensity
         res.body
       end
 
-      def find(filter)
+      def find(meta)
         res = get '/inventory/resources', :params => {
-          filter: Chef::JSONCompat.to_json(filter),
+          filter: Chef::JSONCompat.to_json(validate(meta)),
           type: 'device'
         }
         Chef::Log.warn 'get'
@@ -40,7 +41,7 @@ module Chef::Recipe::ServerDensity
       end
 
       def update(device, meta)
-        meta.reject! { |k, v| device[k] == v }
+        meta = validate(meta).reject! { |k, v| device[k.to_s] == v }
         return device if meta.empty?
 
         res = put "/inventory/devices/#{device['_id']}", meta
