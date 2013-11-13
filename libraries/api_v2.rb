@@ -1,4 +1,4 @@
-module Chef::Recipe::ServerDensity
+module ServerDensity
   module API
     class V2 < Base
 

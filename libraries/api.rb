@@ -1,4 +1,4 @@
-module Chef::Recipe::ServerDensity
+module ServerDensity
   module API
 
     class Base
@@ -60,7 +60,7 @@ module Chef::Recipe::ServerDensity
 
       def validate(meta, default = {})
         meta.each do |k, v|
-          default.update(k.downcase.to_sym => v)
+          default.update(k.to_sym => v)
         end unless meta.nil?
         default
       end
