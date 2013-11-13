@@ -1,4 +1,3 @@
-# ex: set tabstop=2 shiftwidth=2 expandtab:
 #
 # Cookbook Name:: serverdensity
 # Recipe:: install
