@@ -9,6 +9,9 @@ default['serverdensity']['sd_url'] = "CHANGE_ME"
 # or create a new device if not found (see below)
 default['serverdensity']['agent_key'] = nil
 
+# Set this to false on servers you do not wish to monitor
+default['serverdensity']['enabled'] = true
+
 ##############################
 # API config (optional)      #
 ##############################

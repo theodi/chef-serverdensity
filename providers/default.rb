@@ -1,13 +1,15 @@
 action :install do
-#   include_recipe 'serverdensity[install]'
+  if node.serverdensity.enabled
+    install
+  else
+    service 'sd-agent' do
+      action :stop
+    end
+  end
+end
 
-  configure
-
-#   service "sd-agent" do
-#     action [:enable, :start]
-#   end
-
-  synchronize
+action :uninstall do
+  include_recipe 'serverdensity[uninstall]'
 end
 
 def agent_key
@@ -34,17 +36,17 @@ def configure
     raise 'Unable to acquire a ServerDensity agent_key'
   end
 
-  template "/etc/sd-agent/config.cfg" do
-    source "config.cfg.erb"
+  template '/etc/sd-agent/config.cfg' do
+    source 'config.cfg.erb'
     mode 00644
     variables config
-#     notifies :restart, "service[sd-agent]"
+    notifies :restart, 'service[sd-agent]'
   end
 end
 
 def device
   @device ||= begin
-    return nil unless api
+    return unless api
 
     device = if filter and api.version >= 2
       api.find filter
@@ -66,6 +68,18 @@ def filter
   else
     @new_resource.filter
   end
+end
+
+def install
+  include_recipe 'serverdensity[install]'
+
+  configure
+
+  service 'sd-agent' do
+    action [:enable, :start]
+  end
+
+  synchronize
 end
 
 def key_from_file
