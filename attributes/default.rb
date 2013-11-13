@@ -2,29 +2,26 @@
 # Cookbook Name:: serverdensity
 # Attributes:: default
 
+# Set this to your account subdomain i.e. https://companyname.serverdensity.io
 default['serverdensity']['sd_url'] = "CHANGE_ME"
 
 # You must set agent_key unless you want to use the API to query by hostname
 # or create a new device if not found (see below)
 default['serverdensity']['agent_key'] = nil
 
-#########################
-# API config (optional) #
-#########################
+##############################
+# API config (optional)      #
+##############################
 
-# The version of the API to use
-default['serverdensity']['api_version'] = '1.4'
+# These attributes are provided for convenience, but it is better to use
+# the serverdensity LWRP to set these values
 
-# Only set username and password if you wish to use the API rather than
-# setting agent_key
-default['serverdensity']['api_username'] = nil
-default['serverdensity']['api_password'] = nil
+# To use SD v2, set this to your API token
+default['serverdensity']['token'] = nil
 
-# Only set this if you're using v2 of the API
-default['serverdensity']['api_v2_token'] = nil
-
-default['serverdensity']['api_v1_base_url'] = 'https://api.serverdensity.com/'
-default['serverdensity']['api_v2_base_url'] = 'https://api.serverdensity.io/'
+# To use SD v1, set these to your username and password
+default['serverdensity']['user'] = nil
+default['serverdensity']['password'] = nil
 
 ##############################
 # Advanced config (optional) #
@@ -73,6 +70,3 @@ default['serverdensity']['logging_level'] = nil
 
 # If you want to configure any plugin options add them here
 default['serverdensity']['plugin_options'] = {}
-
-# Enable/disable looking up meta data (e.g. agent key) from the AWS EC2 API
-default['serverdensity']['enable_ec2'] = false
