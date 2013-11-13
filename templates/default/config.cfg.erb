@@ -86,17 +86,15 @@ pidfile_directory: <%= @pidfile_directory %>
 logging_level: <%= @logging_level %>
 <% end %>
 
-<% if !@main_plugin_options.nil? and !@main_plugin_options.empty? %>
+<% unless @plugin_options.nil? or @plugin_options.empty? %>
 # Plugin options
-<% @main_plugin_options.each_pair do |name, value| %>
+<% @plugin_options.reject { |k, v| v.class == Hash } .each do |name, value| %>
 <%= name %> = <%= value %>
 <% end %>
-<% end %>
 
-<% if !@section_plugin_options.nil? and !@section_plugin_options.empty? %>
-<% @section_plugin_options.each_pair do |section, options| %>
+<% @plugin_options.select { |k, v| v.class == Hash } .each do |section, options| %>
 [<%= section %>]
-<% options.each_pair do |name, value| %>
+<% options.each do |name, value| %>
 <%= name %> = <%= value %>
 <% end %>
 <% end %>
