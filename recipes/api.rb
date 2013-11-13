@@ -22,6 +22,11 @@ def group(node)
     end
 end
 
+# Check if we're on EC2 and populate the hostname from ohai if available
+if !node['ec2'].nil?
+  node[:hostname] = node['ec2']['hostname'] || node['ec2']['public_hostname']
+end
+
 if api_version < 2
 
   if node['serverdensity']['api_username'].nil?
