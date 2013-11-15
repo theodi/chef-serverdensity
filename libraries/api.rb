@@ -1,8 +1,34 @@
+require 'singleton'
+
 module ServerDensity
   module API
 
     class Base
+      include Singleton
+
       attr_reader :version
+
+      class << self
+        def __init__(klass) # :nodoc:
+          klass.instance_eval {
+            @singleton__instance__ = nil
+            @singleton__mutex__ = Mutex.new
+          }
+          def klass.instance(*args)
+            @singleton__instance__ ||= @singleton__mutex__.synchronize {
+              @singleton__instance__ ||= new(*args)
+            }
+          end
+          klass
+        end
+
+        private
+
+        def inherited(sub_klass)
+          super
+          self.__init__(sub_klass)
+        end
+      end
 
       def initialize(version)
         @version = version.to_f
@@ -66,12 +92,15 @@ module ServerDensity
       end
     end
 
-    def self.new(version, *args)
-      case version.to_i
+    def self.instance(version, *args)
+      @instance ||= case version.to_i
         when 1 then V1
         when 2 then V2
-      end .new version, *args
+      end .instance version, *args
     end
 
   end
 end
+
+require_relative 'api_v1'
+require_relative 'api_v2'

@@ -2,6 +2,8 @@
 # Cookbook Name:: serverdensity
 # Recipe:: install
 
+return unless node.serverdensity.enabled
+
 case node[:platform]
 
   when "debian", "ubuntu"
@@ -43,9 +45,4 @@ end
 
 package "sd-agent" do
   action :install
-end
-
-service "sd-agent" do
-  supports :start => true, :stop => true, :restart => true
-  action :nothing
 end

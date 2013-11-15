@@ -1,9 +1,18 @@
-action :install do
+def whyrun_supported?
+  true
+end
+
+action :configure do
   if node.serverdensity.enabled
-    install
+    converge_by "configure sd-agent and ensure it's running" do
+      configure
+    end
   else
-    service 'sd-agent' do
-      action :stop
+    if service.running
+      converge_by "stop sd-agent" do
+        service.run_action :stop
+        @new_resource.updated_by_last_action true
+      end
     end
   end
 end
@@ -21,8 +30,8 @@ def api
   @api ||= case
     when @new_resource.token
       ServerDensity::API.new 2.0, @new_resource.token
-    when @new_resource.user && @new_resource.password
-      ServerDensity::API.new 1.4, @new_resource.account, @new_resource.user, @new_resource.password
+    when @new_resource.username && @new_resource.password
+      ServerDensity::API.new 1.4, @new_resource.account, @new_resource.username, @new_resource.password
     else
       nil
   end
@@ -30,18 +39,30 @@ end
 
 def configure
   node.normal[:serverdensity][:agent_key] = agent_key
-  config = node.serverdensity.to_hash
 
-  if config['agent_key'].nil?
+  if agent_key.nil?
     raise 'Unable to acquire a ServerDensity agent_key'
   end
 
-  template '/etc/sd-agent/config.cfg' do
-    source 'config.cfg.erb'
-    mode 00644
-    variables config
-    notifies :restart, 'service[sd-agent]'
+  template.cookbook 'serverdensity'
+  template.path '/etc/sd-agent/config.cfg'
+  template.source 'config.cfg.erb'
+  template.mode 00644
+  template.variables node.serverdensity.to_hash
+
+  template.run_action :create
+
+  if template.updated_by_last_action?
+    if service.running
+      service.run_action :restart
+    else
+      service.run_action :enable unless service.enabled
+      service.run_action :start
+    end
+    @new_resource.updated_by_last_action true
   end
+
+  synchronize
 end
 
 def device
@@ -70,18 +91,6 @@ def filter
   end
 end
 
-def install
-  include_recipe 'serverdensity[install]'
-
-  configure
-
-  service 'sd-agent' do
-    action [:enable, :start]
-  end
-
-  synchronize
-end
-
 def key_from_file
   validate ::File.read '/etc/sd-agent-key' if ::File::exist? '/etc/sd-agent-key'
 end
@@ -98,16 +107,30 @@ end
 
 def metadata
   @metadata ||= {
-    group: 'chef-autodeploy',
+    group: node.serverdensity.device_group || 'chef-autodeploy',
     hostname: node.hostname,
     name: @new_resource.name
   }.merge @new_resource.metadata
 end
 
-def synchronize
-  if not @new_resource.metadata.empty? and api and api.version >= 2
-    api.update device, metadata
+def service
+  @service ||= begin
+    service = Chef::Resource::Service.new(@new_resource.name, run_context)
+    service.service_name 'sd-agent'
+    service
   end
+end
+
+def synchronize
+  if @new_resource.token and not @new_resource.metadata.empty?
+    converge_by "update metadata on Server Density" do
+      api.update device, metadata
+    end
+  end
+end
+
+def template
+  @template ||= Chef::Resource::Template.new(@new_resource.name, run_context)
 end
 
 def validate(key)

@@ -23,12 +23,15 @@ default['serverdensity']['enabled'] = true
 default['serverdensity']['token'] = nil
 
 # To use SD v1, set these to your username and password
-default['serverdensity']['user'] = nil
+default['serverdensity']['username'] = nil
 default['serverdensity']['password'] = nil
 
 ##############################
 # Advanced config (optional) #
 ##############################
+
+# Server Density group server should belong to (requires API)
+default['serverdensity']['group'] = nil
 
 # Only change this to a path if you want plugins, will be ignored otherwise
 default['serverdensity']['plugin_dir'] = ""
