@@ -1,46 +1,41 @@
 module ServerDensity
   module API
-    class V1 < Base
 
-      def initialize(version, account, user, pass)
-        super version
-        @user = user
-        @pass = pass
-        params :account => account
-      end
+    module V1
+      include Base
 
       def base_url
         @base_url ||= "https://api.serverdensity.com/#{version}"
           .sub '://', "://#{URI::escape(@user)}:#{URI::escape(@pass)}@"
       end
 
-      def create(meta)
+      def create_device(meta)
         res = post '/devices/add', validate(meta,
           :notes => 'Created automatically by chef-serverdensity'
         )
 
         if res.code != 200
-          Chef::Log.warn("Unable to create device on Serverdensity")
+#           Chef::Log.warn("Unable to create device on Serverdensity")
           return nil
         end
 
         res.body['data']
       end
 
-      def find(meta)
+      def find_device(meta)
         res = get '/devices/getByHostName', :params => validate(meta)
-        Chef::Log.warn 'get'
-        Chef::Log.warn res.body
+#         Chef::Log.warn 'get'
+#         Chef::Log.warn res.body
 
         if res.code != 200
-          Chef::Log.warn("Unable to retrieve device from Serverdensity")
+#           Chef::Log.warn("Unable to retrieve device from Serverdensity")
           return nil
         end
 
         res.body['data']['device']
       end
 
-      def update(device, meta)
+      def update_device(device, meta)
         nil
       end
 
@@ -50,6 +45,14 @@ module ServerDensity
         meta
       end
 
+      private
+
+      def initialize(account, user, pass)
+        @user = user
+        @pass = pass
+        params :account => account
+      end
     end
+
   end
 end
