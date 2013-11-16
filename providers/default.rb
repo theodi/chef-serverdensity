@@ -1,98 +1,91 @@
+#
+# Cookbook Name:: serverdensity
+# Provider:: default
+
 def whyrun_supported?
   true
 end
 
+# actions
+
 action :configure do
   if node.serverdensity.enabled
-    converge_by "configure sd-agent and ensure it's running" do
-      configure
-    end
+    setup
+    configure
+    enable
+    sync
   else
-    if service.running
-      converge_by "stop sd-agent" do
-        service.run_action :stop
-        @new_resource.updated_by_last_action true
-      end
+    disable
+  end
+end
+
+# tasks
+
+def configure
+  converge_by 'fetch Server Density agent key' do
+    node.normal.serverdensity.agent_key = agent_key
+    raise 'Unable to acquire a ServerDensity agent_key' if agent_key.nil?
+  end
+
+  template.cookbook 'serverdensity'
+  template.source 'config.cfg.erb'
+
+  template.path '/etc/sd-agent/config.cfg'
+  template.mode 00644
+
+  template.variables Chef::Mixin::DeepMerge.deep_merge(
+    node.serverdensity.to_hash,
+    @new_resource.settings
+  )
+
+  template.run_action :create
+
+  @new_resource.updated_by_last_action template.updated_by_last_action?
+end
+
+def disable
+  if service.running
+    service.run_action :stop
+    @new_resource.updated_by_last_action true
+  end
+end
+
+def enable
+  if service.running
+    service.run_action :restart if @new_resource.updated_by_last_action?
+  else
+    service.run_action :enable unless service.enabled
+    service.run_action :start
+    @new_resource.updated_by_last_action true
+  end
+end
+
+def setup
+  case
+    when @new_resource.token
+      ServerDensity::API.configure 2.0, @new_resource.token
+    when @new_resource.username && @new_resource.password
+      ServerDensity::API.configure 1.4, @new_resource.account, @new_resource.username, @new_resource.password
+  end
+end
+
+def sync
+  unless @new_resource.metadata.empty?
+    converge_by "update metadata on Server Density" do
+      device.update metadata if device
     end
   end
 end
 
-action :uninstall do
-  include_recipe 'serverdensity[uninstall]'
-end
+# utils
 
 def agent_key
   @agent_key ||= @new_resource.agent_key ||
     key_from_file || key_from_ec2 || key_from_api
 end
 
-def api
-  @api ||= case
-    when @new_resource.token
-      ServerDensity::API.new 2.0, @new_resource.token
-    when @new_resource.username && @new_resource.password
-      ServerDensity::API.new 1.4, @new_resource.account, @new_resource.username, @new_resource.password
-    else
-      nil
-  end
-end
-
-def configure
-  node.normal[:serverdensity][:agent_key] = agent_key
-
-  if agent_key.nil?
-    raise 'Unable to acquire a ServerDensity agent_key'
-  end
-
-  template.cookbook 'serverdensity'
-  template.path '/etc/sd-agent/config.cfg'
-  template.source 'config.cfg.erb'
-  template.mode 00644
-  template.variables node.serverdensity.to_hash
-
-  template.run_action :create
-
-  if template.updated_by_last_action?
-    if service.running
-      service.run_action :restart
-    else
-      service.run_action :enable unless service.enabled
-      service.run_action :start
-    end
-    @new_resource.updated_by_last_action true
-  end
-
-  synchronize
-end
-
-def device
-  @device ||= begin
-    return unless api
-
-    device = if filter and api.version >= 2
-      api.find filter
-    else
-      api.find :hostname => node.hostname
-    end
-
-    if device.nil?
-      device = api.create metadata
-    end
-
-    device
-  end
-end
-
-def filter
-  if @agent_key
-    {:agentKey => agent_key}
-  else
-    @new_resource.filter
-  end
-end
-
-def key_from_file
-  validate ::File.read '/etc/sd-agent-key' if ::File::exist? '/etc/sd-agent-key'
+def key_from_api
+  validate device.agentKey if device
 end
 
 def key_from_ec2
@@ -101,8 +94,21 @@ def key_from_ec2
   end
 end
 
-def key_from_api
-  validate device['agentKey'] if device
+def key_from_file
+  validate ::File.read '/etc/sd-agent-key' if ::File::exist? '/etc/sd-agent-key'
+end
+
+def validate(key)
+  key.match(/^\w{32}$/) ? key : nil
+end
+
+# helpers
+
+def device
+  return unless ServerDensity::API.configured?
+  @device ||=
+    ServerDensity::Device.find(@new_resource.device || @new_resource.name) ||
+    ServerDensity::Device.create(metadata)
 end
 
 def metadata
@@ -113,6 +119,8 @@ def metadata
   }.merge @new_resource.metadata
 end
 
+# resources
+
 def service
   @service ||= begin
     service = Chef::Resource::Service.new(@new_resource.name, run_context)
@@ -121,18 +129,6 @@ def service
   end
 end
 
-def synchronize
-  if @new_resource.token and not @new_resource.metadata.empty?
-    converge_by "update metadata on Server Density" do
-      api.update device, metadata
-    end
-  end
-end
-
 def template
   @template ||= Chef::Resource::Template.new(@new_resource.name, run_context)
-end
-
-def validate(key)
-  key.match(/^\w{32}$/) ? key : nil
 end

@@ -1,31 +1,20 @@
 #
 # Cookbook Name:: serverdensity
 # Resource:: default
-#
 
 actions :configure
 default_action :configure
 
-# server name
+# device name
 attribute :name,
   :kind_of => String,
   :name_attribute => true,
   :required => true
 
-# optional agent_key
-attribute :agent_key,
-  :kind_of => [String, FalseClass],
-  :regex => /^\w{32}$/,
-  :default => node.serverdensity.agent_key
-
-# apiv2 token
-attribute :token,
-  :kind_of => String,
-  :default => node.serverdensity.token
-
 # apiv1 credentials
 attribute :account,
   :kind_of => String,
+  :name_attribute => true,
   :default => node.serverdensity.sd_url.sub(/^https?:\/\//, "")
 attribute :username,
   :kind_of => String,
@@ -34,12 +23,27 @@ attribute :password,
   :kind_of => String,
   :default => node.serverdensity.password
 
-# server filter
-attribute :filter,
-  :kind_of => Hash,
-  :default => {:hostname => node.hostname}
+# apiv2 token
+attribute :token,
+  :kind_of => String,
+  :default => node.serverdensity.token
 
-# server metadata
+# optional agent_key (nil forces refresh)
+attribute :agent_key,
+  :kind_of => [String, NilClass],
+  :regex => /^\w{32}$/,
+  :default => node.serverdensity.agent_key
+
+# optional device identifier (defaults to device name)
+attribute :device,
+  :kind_of => [Hash, String]
+
+# optional metadata
 attribute :metadata,
+  :kind_of => Hash,
+  :default => {}
+
+# optional settings
+attribute :settings,
   :kind_of => Hash,
   :default => {}
