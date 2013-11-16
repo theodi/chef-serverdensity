@@ -8,39 +8,20 @@ module ServerDensity
     module Base
       attr_reader :version
 
-      def _request(method, path, payload, options = {}, &block)
-        options[:params] = if options.has_key? :params
-          params.merge(options[:params])
-        else
-          params
-        end
-
-        req = { method: method, url: "#{base_url}#{path}", headers: options }
-        req[:payload] = payload if [:patch, :post, :put].include? method
-
-        begin
-          res = RestClient::Request.execute req, &block
-        rescue => err
-          res = err.response
-        end
-
-        RestClient::Response.create(
-          Chef::JSONCompat.from_json(res),
-          res.net_http_res,
-          res.args
-        )
+      def delete(path, *args, &block)
+        request :delete, path, nil, *args, &block
       end
 
       def get(path, *args, &block)
-        _request :get, path, nil, *args, &block
+        request :get, path, nil, *args, &block
       end
 
       def post(path, *args, &block)
-        _request :post, path, *args, &block
+        request :post, path, *args, &block
       end
 
       def put(path, *args, &block)
-        _request :put, path, *args, &block
+        request :put, path, *args, &block
       end
 
       def base_url
@@ -61,6 +42,31 @@ module ServerDensity
           default.update(k.to_sym => v)
         end unless meta.nil?
         default
+      end
+
+      private
+
+      def request(method, path, payload, options = {}, &block)
+        options[:params] = if options.has_key? :params
+          params.merge(options[:params])
+        else
+          params
+        end
+
+        req = { method: method, url: "#{base_url}#{path}", headers: options }
+        req[:payload] = payload if [:patch, :post, :put].include? method
+
+        begin
+          res = RestClient::Request.execute req, &block
+        rescue => err
+          res = err.response
+        end
+
+        RestClient::Response.create(
+          Chef::JSONCompat.from_json(res),
+          res.net_http_res,
+          res.args
+        )
       end
     end
 

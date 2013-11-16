@@ -31,6 +31,10 @@ module ServerDensity
         self['agentKey']
       end
 
+      def alerts
+        API.find_alerts(self)
+      end
+
       def group
         self['group']
       end
