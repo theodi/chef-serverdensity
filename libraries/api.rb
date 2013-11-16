@@ -1,6 +1,6 @@
-require_relative 'api_base'
-require_relative 'api_v1'
-require_relative 'api_v2'
+#
+# Cookbook Name:: serverdensity
+# Library:: api
 
 module ServerDensity
   module API
@@ -8,7 +8,7 @@ module ServerDensity
     class << self
       def configure(version, *args)
         def configure(*args)
-#           Chef::Log.warn("Server Density API has already been configured")
+          Chef::Log.warn("Server Density API has already been configured")
           self
         end
         case version.to_i

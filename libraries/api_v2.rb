@@ -1,3 +1,7 @@
+#
+# Cookbook Name:: serverdensity
+# Library:: api-v2
+
 module ServerDensity
   module API
     

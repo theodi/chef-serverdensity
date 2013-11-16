@@ -1,3 +1,7 @@
+#
+# Cookbook Name:: serverdensity
+# Library:: api-base
+
 module ServerDensity
   module API
 
@@ -13,8 +17,6 @@ module ServerDensity
 
         req = { method: method, url: "#{base_url}#{path}", headers: options }
         req[:payload] = payload if [:patch, :post, :put].include? method
-
-        Chef::Log.warn req.inspect
 
         begin
           res = RestClient::Request.execute req, &block

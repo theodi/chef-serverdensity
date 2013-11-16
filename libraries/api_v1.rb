@@ -1,3 +1,7 @@
+#
+# Cookbook Name:: serverdensity
+# Library:: api-v1
+
 module ServerDensity
   module API
 
@@ -9,34 +13,57 @@ module ServerDensity
           .sub '://', "://#{URI::escape(@user)}:#{URI::escape(@pass)}@"
       end
 
+      def convert(data)
+        out = data.dup
+
+        if data.has_key? 'device'
+          out.delete 'device'
+          out['_id'] = data['device']['deviceId']
+        else
+          out.delete 'deviceId'
+          out['_id'] = data['deviceId']
+        end
+
+        out.delete 'hostName'
+        out.merge({
+          'hostname' => data['hostName']
+        })
+      end
+
       def create_device(meta)
         res = post '/devices/add', validate(meta,
           :notes => 'Created automatically by chef-serverdensity'
         )
 
         if res.code != 200
-#           Chef::Log.warn("Unable to create device on Serverdensity")
+          Chef::Log.warn("Unable to create device on Serverdensity")
           return nil
         end
 
-        res.body['data']
+        convert res.body['data']
       end
 
       def find_device(meta)
-        res = get '/devices/getByHostName', :params => validate(meta)
-#         Chef::Log.warn 'get'
-#         Chef::Log.warn res.body
+        endpoint = case meta.first.first
+          when :name then '/devices/getByName'
+          when :hostname, :hostName then '/devices/getByHostName'
+          else
+            Chef::Log.warn("Server Density v1 only supports searching using name or hostname")
+            return nil
+        end
+
+        res = get endpoint, :params => validate(meta)
 
         if res.code != 200
-#           Chef::Log.warn("Unable to retrieve device from Serverdensity")
+          Chef::Log.warn("Unable to retrieve device from Serverdensity")
           return nil
         end
 
-        res.body['data']['device']
+        convert res.body['data']['device']
       end
 
       def update_device(device, meta)
-        nil
+        Hash.new
       end
 
       def validate(meta, default = {})
