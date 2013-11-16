@@ -9,7 +9,8 @@ module ServerDensity
       @@cache = {}
 
       def create(meta)
-        @@cache[meta] ||= begin
+        name = meta[:name] || meta
+        @@cache[name] ||= begin
           device = API.create_device(meta)
           device.extend Base
         end
