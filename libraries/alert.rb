@@ -6,20 +6,14 @@ module ServerDensity
   class Alert
 
     class << self
-      @@cache = {}
-
-      def create(meta)
-        @@cache[name] ||= begin
-          alert = API.create_alert(meta)
-          alert.extend Base
-        end
+      def create(device, meta)
+        alert = API.create_alert(device, meta)
+        alert.extend Base
       end
 
       def find(device)
-        @@cache[device] ||= begin
-          alerts = API.find_alerts(device)
-          alerts.map { |a| a.extend Base }
-        end
+        alerts = API.find_alerts(device)
+        alerts.map { |a| a.extend Base }
       end
     end
 

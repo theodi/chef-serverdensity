@@ -2,8 +2,8 @@
 # Cookbook Name:: serverdensity
 # Resource:: default
 
-actions :configure
-default_action :configure
+actions :clear, :configure, :disable, :enable, :setup, :sync, :update
+default_action :update
 
 # device name
 attribute :name,

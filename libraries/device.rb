@@ -21,6 +21,7 @@ module ServerDensity
           meta = {:name => meta} if meta.class == String
           device = API.find_device(meta)
           device.extend Base
+          @@cache[device.name] = device
         end
       end
     end
@@ -29,10 +30,6 @@ module ServerDensity
 
       def agent_key
         self['agentKey']
-      end
-
-      def alerts
-        API.find_alerts(self)
       end
 
       def group
@@ -51,8 +48,31 @@ module ServerDensity
         self['_id']
       end
 
+      def alerts
+        @alerts ||= Alert.find(self)
+      end
+
+      def watch(*args)
+        alert = Alert.create(self, *args)
+        alerts << alert if alert
+        alert
+      end
+
+      def reset
+        alerts.delete_if do |alert|
+          alert.delete
+        end
+        @reset = alerts.empty?
+      end
+
+      def reset?
+        @reset || false
+      end
+
       def update(meta)
-        self.merge! API.update_device(self, meta)
+        diff = API.update_device(self, meta)
+        self.merge! diff
+        diff
       end
 
     end

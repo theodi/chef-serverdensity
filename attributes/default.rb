@@ -31,7 +31,7 @@ default['serverdensity']['password'] = nil
 ##############################
 
 # Server Density group server should belong to (requires API)
-default['serverdensity']['group'] = nil
+default['serverdensity']['device_group'] = nil
 
 # Only change this to a path if you want plugins, will be ignored otherwise
 default['serverdensity']['plugin_dir'] = ""

@@ -8,6 +8,8 @@ module ServerDensity
     module Base
       attr_reader :version
 
+      protected
+
       def delete(path, *args, &block)
         request :delete, path, nil, *args, &block
       end
@@ -57,16 +59,15 @@ module ServerDensity
         req[:payload] = payload if [:patch, :post, :put].include? method
 
         begin
-          res = RestClient::Request.execute req, &block
+          response(RestClient::Request.execute(req, &block))
         rescue => err
-          res = err.response
+          raise err.class.new(response(err.response), err.http_code)
         end
+      end
 
-        RestClient::Response.create(
-          Chef::JSONCompat.from_json(res),
-          res.net_http_res,
-          res.args
-        )
+      def response(res)
+        body = Chef::JSONCompat.from_json(res)
+        RestClient::Response.create(body, res.net_http_res, res.args)
       end
     end
 

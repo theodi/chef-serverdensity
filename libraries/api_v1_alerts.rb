@@ -7,40 +7,41 @@ module ServerDensity
     module V1
       module Alerts
 
-        def convert_alert(data)
-        end
-
-        def create_alert(meta)
-          res = post '/alerts/add', validate(meta)
-
-          if res.code != 200
-            Chef::Log.warn("Unable to create alert on Serverdensity")
-            return nil
-          end
-
-          convert_alert res.body['data']
+        def create_alert(device, meta)
+          convert_alert post('/alerts/add', validate(meta, :serverId => device['_serverId'])).body['data']
+        rescue => err
+          error(err, 'Unable to create alert on Serverdensity')
         end
 
         def find_alerts(device)
-          res = get '/alerts/list', :params => {:deviceId => device.id}
-
-          if res.code != 200
-            Chef::Log.warn("Unable to retrieve alerts from Serverdensity")
-            return nil
+          get('/alerts/list', :params => {:deviceId => device.id}).body['data']['alerts'].map do |a|
+            convert_alert a
           end
-
-          convert_alerts res.body['data']['alerts']
+        rescue => err
+          error(err, 'Unable to retrieve alerts from Serverdensity')
         end
 
         def delete_alert(alert)
-          res = post '/alerts/delete', :params => {:alertId => alert.id}
+          post('/alerts/delete', :alertId => alert.id); true
+        rescue => err
+          error(err, 'Unable to delete alert from Serverdensity')
+        end
 
-          if res.code != 200
-            Chef::Log.warn("Unable to delete alert from Serverdensity")
-            return nil
+        private
+
+        def convert_alert(data)
+          out = data.dup
+
+          if data.has_key? 'alert'
+            out['_id'] = data['alert']['alertId']
+          else
+            out.delete 'alertId'
+            out['_id'] = data['alertId']
           end
 
-          true
+          out['group'] = nil
+
+          out
         end
 
       end

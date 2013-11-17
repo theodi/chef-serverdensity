@@ -8,20 +8,13 @@ end
 
 # actions
 
-action :configure do
-  if node.serverdensity.enabled
-    setup
-    configure
-    enable
-    sync
-  else
-    disable
-  end
+action :clear do
+  converge_by 'delete all existing Server Density alerts for device' do
+    @new_resource.updated_by_last_action device.reset
+  end if device
 end
 
-# tasks
-
-def configure
+action :configure do
   converge_by 'fetch Server Density agent key' do
     node.normal.serverdensity.agent_key = agent_key
     raise 'Unable to acquire a ServerDensity agent_key' if agent_key.nil?
@@ -43,49 +36,74 @@ def configure
   @new_resource.updated_by_last_action template.updated_by_last_action?
 end
 
-def disable
-  if service.running
-    service.run_action :stop
-    @new_resource.updated_by_last_action true
-  end
+action :disable do
+  service.run_action :stop if service.running
+  service.run_action :disable if service.enabled
+  @new_resource.updated_by_last_action service.updated_by_last_action?
 end
 
-def enable
+action :enable do
   if service.running
     service.run_action :restart if @new_resource.updated_by_last_action?
   else
     service.run_action :enable unless service.enabled
     service.run_action :start
-    @new_resource.updated_by_last_action true
   end
+  @new_resource.updated_by_last_action service.updated_by_last_action?
 end
 
-def setup
-  case
+action :setup do
+  api = case
     when @new_resource.token
       ServerDensity::API.configure 2.0, @new_resource.token
     when @new_resource.username && @new_resource.password
       ServerDensity::API.configure 1.4, @new_resource.account, @new_resource.username, @new_resource.password
   end
+  @new_resource.updated_by_last_action !api.nil?
 end
 
-def sync
+action :sync do
   unless @new_resource.metadata.empty?
     converge_by "update metadata on Server Density" do
-      device.update metadata if device
-    end
+      @new_resource.updated_by_last_action !device.update(metadata).empty?
+    end if device
   end
 end
 
-# utils
+action :update do
+  @new_resource.run_action :setup
+  if node.serverdensity.enabled
+    @new_resource.run_action :configure
+    @new_resource.run_action :enable
+  else
+    @new_resource.run_action :disable
+  end
+  @new_resource.run_action :sync if ServerDensity::API.configured?
+end
+
+# methods
+
+def define_resource_requirements
+  requirements.assert(:clear, :sync) do |a|
+    a.assertion { ServerDensity::API.configured? }
+    a.failure_message Exception, 'Server Density API has not be configured'
+  end
+end
 
 def agent_key
   @agent_key ||= @new_resource.agent_key ||
     key_from_file || key_from_ec2 || key_from_api
 end
 
+def device
+  return unless ServerDensity::API.configured?
+  @device ||=
+    ServerDensity::Device.find(@new_resource.device || @new_resource.name) ||
+    ServerDensity::Device.create(metadata)
+end
+
 def key_from_api
-  validate device.agentKey if device
+  validate device.agent_key if device
 end
 
 def key_from_ec2
@@ -98,19 +116,6 @@ def key_from_file
   validate ::File.read '/etc/sd-agent-key' if ::File::exist? '/etc/sd-agent-key'
 end
 
-def validate(key)
-  key.match(/^\w{32}$/) ? key : nil
-end
-
-# helpers
-
-def device
-  return unless ServerDensity::API.configured?
-  @device ||=
-    ServerDensity::Device.find(@new_resource.device || @new_resource.name) ||
-    ServerDensity::Device.create(metadata)
-end
-
 def metadata
   @metadata ||= {
     group: node.serverdensity.device_group || 'chef-autodeploy',
@@ -119,16 +124,21 @@ def metadata
   }.merge @new_resource.metadata
 end
 
-# resources
-
 def service
   @service ||= begin
-    service = Chef::Resource::Service.new(@new_resource.name, run_context)
-    service.service_name 'sd-agent'
-    service
+    resource = Chef::Resource::Service.new(@new_resource.name, run_context)
+    resource.service_name 'sd-agent'
+    provider = resource.provider_for_action(:enable)
+    provider.load_current_resource
+    provider.load_new_resource_state
+    resource
   end
 end
 
 def template
   @template ||= Chef::Resource::Template.new(@new_resource.name, run_context)
+end
+
+def validate(key)
+  key.match(/^\w{32}$/) ? key : nil
 end

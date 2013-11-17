@@ -2,6 +2,9 @@
 # Cookbook Name:: serverdensity
 # Library:: api-v1
 
+require_relative 'api_v1_alerts'
+require_relative 'api_v1_devices'
+
 module ServerDensity
   module API
 
@@ -10,8 +13,16 @@ module ServerDensity
       include Alerts
       include Devices
 
+      protected
+
       def base_url
         @base_url ||= "https://#{@user}:#{@pass}@api.serverdensity.com/#{version}"
+      end
+
+      def error(err, message)
+        message = "Server Density API error: #{err.response['error']['message']}" rescue message
+        Chef::Log.warn(message)
+        nil
       end
 
       def validate(meta, default = {})
