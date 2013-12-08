@@ -1,4 +1,6 @@
-# create the alerts defined in the ['serverdensity']['alerts'] hash
+#
+# Cookbook Name:: serverdensity
+# Recipe:: alerts
 
 include_recipe "serverdensity"
 
