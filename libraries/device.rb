@@ -20,6 +20,7 @@ module ServerDensity
         @@cache[meta] ||= begin
           meta = {:name => meta} if meta.class == String
           device = API.find_device(meta)
+          return nil if device.nil?
           device.extend Base
           @@cache[device.name] = device
         end
