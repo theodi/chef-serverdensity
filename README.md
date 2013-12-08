@@ -37,7 +37,7 @@ This cookbook has dependencies on the following cookbooks:
 
   3. Call the LWRP as described [below](#lwrp) to dynamically configure `sd-agent`
 
-  4. Call the `serverdensity_alert` LWRP to configure custom alerts
+  4. Call the `serverdensity_alert` [LWRP](#serverdensity_alert) to configure custom alerts
 
 ## Attributes
 
@@ -113,7 +113,28 @@ host = localhost
 
 ## LWRP
 
-This cookbook implements a LWRP which facilitates the dynamic configuration the `sd-agent`. The `agent_key` for the device can be acquired by various methods, in order attempts are made to:
+### serverdensity
+
+#### Actions
+
+  - clear  
+    remove all alerts from device
+  - configure  
+    write agent config, get token (see below)
+  - disable  
+    stop agent if running
+  - enable  
+    start agent if not running
+  - setup  
+    initialize API for future calls
+  - sync  
+    synchronize device metadata
+  - update (default)  
+    setup api, either configure and enable or disable agent, sync metadata if API is available
+
+#### Getting Device Token
+
+The configure action of this LWRP facilitates the dynamic configuration the `sd-agent`. The `agent_key` for the device can be acquired by various methods, in order attempts are made to:
 
   1. use the `agent_key` passed into LWRP
   2. use `agent_key` defined in attributes
@@ -124,11 +145,11 @@ This cookbook implements a LWRP which facilitates the dynamic configuration the 
 
 Which of these steps take place depends on the various parameters passed in (see below), and when the `agent_key` is found. As soon as it is acquired no further steps are run.
 
-### Default
+##### Default
 
 The default recipe will use steps **2-4** to find an `agent_key`
 
-### Manual
+##### Manual
 
 ```rb
 # step 1 only
@@ -137,7 +158,7 @@ serverdensity node.name do
 end
 ```
 
-### API v1
+##### API v1
 
 ```rb
 # steps 2-6
@@ -147,7 +168,7 @@ serverdensity node.name do
 end
 ```
 
-### API v2
+##### API v2
 ```rb
 # steps 2-6
 serverdensity node.name do
@@ -155,27 +176,63 @@ serverdensity node.name do
 end
 ```
 
-### Other settings
+#### Other settings
 
-#### Filter (v2 only)
+##### Device
 
 By default, step **5** will use the hostname of the device to match against those stored in Server Density, however occasionally it makes more sense to match on something else, for example when using EC2:
 
 ```rb
+# v2 only (v1 only supports name and hostname keys)
 serverdensity node.name do
   token '00000000000000000000000000000000'
-  filter :providerId => node.ec2.instance_id
+  device :providerId => node.ec2.instance_id
 end
 ```
 
-#### Metadata
+##### Metadata
 
-The LWRP also supports writing metadata to devices during creation via the API. Updating metadata is also supported by API v2.
+The LWRP also supports writing metadata (via the sync action) to devices during creation via the API. Updating metadata is also supported by API v2.
 
 ```rb
 serverdensity node.name do
   token '00000000000000000000000000000000'
   metadata :group => 'chef-lwrp'
+end
+```
+
+### serverdensity_alert
+
+This is used to create alerts for your newly minted device, it currently just acts as a wrapper for API calls and as such, v1 and v2 usage is significantly different, the hope is to give them a shared DSL in the future.
+
+**This LWRP requires that API credentials (v1 or v2) have been provided, if they have not, it will throw an error.**
+
+#### API v1
+
+```rb
+# create v1 alert (https://github.com/serverdensity/sd-api-docs/blob/master/sections/alerts.md#add)
+serverdensity_alert "high-cpu" do
+  metadata(
+    :userId => ['group'],
+    :notificationType => ['email'],
+    :checkType => 'loadAvrg',
+    :comparison => :>,
+    :triggerThreshold => 3,
+    :notificationFixed => true,
+    :notificationDelay => 5,
+    :notificationFrequencyOnce => true
+  )
+end
+```
+
+#### API v2
+
+```rb
+# create v2 alert
+serverdensity_alert "high-cpu" do
+  metadata(
+    # params as described here https://apidocs.serverdensity.com/Alerts/Alert_Configs/Creating
+  )
 end
 ```
 
