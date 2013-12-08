@@ -23,7 +23,7 @@ This cookbook has dependencies on the following cookbooks:
 
 ### Basic
 
-  1. Include `recipe[serverdensity]` in a run list
+  1. Include `recipe[serverdensity::alerts]` in a run list
 
   2. Then:
     * Override the `node['serverdensity']['agent_key']` attribute on a [higher level](http://wiki.opscode.com/display/chef/Attributes#Attributes-AttributesPrecedence). *recommended*
@@ -33,7 +33,7 @@ This cookbook has dependencies on the following cookbooks:
 
   1. Add `serverdensity` as a dependency to another cookbook
 
-  2. Use `include_recipe 'serverdensity::install'` to install `sd-agent`
+  2. Use `include_recipe 'serverdensity'` to install `sd-agent`
 
   3. Call the LWRP as described [below](#lwrp) to dynamically configure `sd-agent`
 
@@ -42,8 +42,9 @@ This cookbook has dependencies on the following cookbooks:
 ## Attributes
 
 ### Basic Config
- * `node['serverdensity']['sd_url']`  
-   Your Server Density subdomain, prefixed with either `http://` or `https://`, **required**
+
+ * `node['serverdensity']['sd_url']` **required**  
+   Your Server Density subdomain, prefixed with either `http://` or `https://`
  * `node['serverdensity']['agent_key']`  
    Your Server Density agent key (don't set this if you want to use the API to handle querying nodes/creating nodes)
  * `node['serverdensity']['enabled']`  
@@ -51,9 +52,9 @@ This cookbook has dependencies on the following cookbooks:
 
 ### Optional API Config
 
-*If your account URL ends in .com you are using v1*
+If you don't set `agent_key` then set these parameters and new servers will be automatically created in your account.
 
-Use this if you're still on Server Density v1 and wish to use the API to create nodes (rather than auto-copy templates):
+*If your account URL ends in .com you are using v1*
 
  * `node['serverdensity']['username']`  
    Username for authenticating with the v1 API (if `agent_key` isn't set)
@@ -62,47 +63,58 @@ Use this if you're still on Server Density v1 and wish to use the API to create 
 
 *If your account URL ends in .io you are using v2*
 
-If you don't set `agent_key` then set these parameters and new servers will be automatically created in your account.
-
  * `node['serverdensity']['token']`  
     Your API token from Preferences > Security in Server Density.
 
 ### Optional Advanced Config
 
- * `node['serverdensity']['group']`  
+ * `node['serverdensity']['device_group']`  
     Sets the group for the device to be created in, to inherit alerts automatically.
- * `node['serverdensity']['plugin_dir']`  
-    Sets the directory the agent looks for plugins, if left blank it is ignored
+
  * `node['serverdensity']['apache_status_url']`  
     URL to get the Apache2 status page from (e.g. `mod_status`), disabled if not set
  * `node['serverdensity']['apache_status_user']`  
     Username to authenticate to the Apache2 status page, required if `apache_status_url` is set
  * `node['serverdensity']['apache_status_pass']`  
     Password to authenticate to the Apache2 status page, required if `apache_status_url` is set
+
  * `node['serverdensity']['mongodb_server']`  
     Server to get MongoDB status monitoring from, this takes a full [MongoDB connection URI](http://docs.mongodb.org/manual/reference/connection-string/) so you can set username/password etc. details here if needed, disabled if not set
  * `node['serverdensity']['mongodb_dbstats']`  
     Enables MongoDB stats if `true` and `mongodb_server` is set, *default*: `false`
  * `node['serverdensity']['mongodb_replset']`  
     Enables MongoDB replset stats if `true` and `mongodb_server` is set, *default*: `false`
+
  * `node['serverdensity']['mysql_server']`  
     Server to get MySQL status monitoring from, disabled if not set
  * `node['serverdensity']['mysql_user']`  
     Username to authenticate to MySQL, required if `mysql_server` is set
  * `node['serverdensity']['mysql_pass']`  
     Password to authenticate to MySQL, required if `mysql_server` is set
+
  * `node['serverdensity']['nginx_status_url']`  
     URL to get th Nginx status page from, disabled if not set
+
  * `node['serverdensity']['rabbitmq_status_url']`  
     URL to get the RabbitMQ status from via [HTTP management API](http://www.rabbitmq.com/management.html), disabled if not set
  * `node['serverdensity']['rabbitmq_user']`  
     Username to authenticate to the RabbitMQ management API, required if `rabbitmq_status_url` is set
  * `node['serverdensity']['rabbitmq_pass']`  
     Password to authenticate to the RabbitMQ management API, required if `rabbitmq_status_url` is set
+
  * `node['serverdensity']['tmp_directory']`  
     Override where the agent stores temporary files, system default tmp will be used if not set
  * `node['serverdensity']['pidfile_directory']`  
     Override where the agent stores it's PID file, temp dir (above or system default) is used if not set
+
+ * `node['serverdensity']['logging_level']`  
+    Set the logging level for the agent
+
+ * `node['serverdensity']['alerts']`  
+    This should be an array of hashes, each of which defines an alert, keys should match those exposed by the [alert LWRP](#serverdensity_alert) and will be created by the alerts recipe.
+
+ * `node['serverdensity']['plugin_dir']`  
+    Sets the directory the agent looks for plugins, if left blank it is ignored
  * `node['serverdensity']['plugin_options']`  
     A hash of optional named plugin options if you have agent plugins you want to configure, simple key-values will be added to the `[Main]` section of the config while sub-hashes will be generated into sections e.g. `{"Beanstalk"=>{"host"=>"localhost"}}` becomes:
 
@@ -111,25 +123,50 @@ If you don't set `agent_key` then set these parameters and new servers will be a
 host = localhost
 ```
 
+## Recipes
+
+### default
+
+Installs the sd-agent, ready for the LWRP based setup.
+
+### alerts
+
+Configures sd-agent from attributes rather than LWRPs, and creates attribute based alerts defined in the `['serverdensity']['alerts']` hash. Here is an example of an alert (for API v1):
+
+```rb
+node['serverdensity']['alerts']['high-load'] = { 
+  'metadata' => {
+    :userId => ['group'],
+    :notificationType => ['email'],
+    :checkType => 'loadAvrg',
+    :comparison => :>,
+    :triggerThreshold => 3,
+    :notificationFixed => true,
+    :notificationDelay => 5,
+    :notificationFrequencyOnce => true
+  }
+}
+```
+
 ## LWRP
 
 ### serverdensity
 
 #### Actions
 
-  - clear  
+  - `clear`  
     remove all alerts from device
-  - configure  
+  - `configure`  
     write agent config, get token (see below)
-  - disable  
+  - `disable`  
     stop agent if running
-  - enable  
+  - `enable`  
     start agent if not running
-  - setup  
+  - `setup`  
     initialize API for future calls
-  - sync  
+  - `sync`  
     synchronize device metadata
-  - update (default)  
+  - `update` **(default)**  
     setup api, either configure and enable or disable agent, sync metadata if API is available
 
 #### Getting Device Token

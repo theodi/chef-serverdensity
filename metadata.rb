@@ -8,6 +8,7 @@ version            "1.0.1"
 
 depends "apt"
 depends "yum"
+depends 'dpkg_autostart', '~> 0.1.6'
 
 supports "ubuntu"
 supports "debian"
@@ -17,5 +18,5 @@ supports "fedora"
 supports "amazon"
 supports "scientific"
 
-recipe "serverdensity::default", "Default"
-recipe "serverdensity::install", "Installs, configures and starts sd-agent"
+recipe "serverdensity::default", "Installs serverdensity agent"
+recipe "serverdensity::alerts", "Installs, configures and starts sd-agent and creates alerts"
