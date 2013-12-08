@@ -2,7 +2,6 @@
 # Cookbook Name:: serverdensity
 # Attributes:: default
 
-default['serverdensity']['sd_url'] = nil
 default['serverdensity']['agent_key'] = nil
 default['serverdensity']['enabled'] = true
 
@@ -38,4 +37,4 @@ default['serverdensity']['pidfile_directory'] = nil
 
 default['serverdensity']['logging_level'] = nil
 
-default['serverdensity']['alerts'] = []
+default['serverdensity']['alerts'] = {}

@@ -8,7 +8,7 @@ end
 
 # actions
 
-action :add do
+action :create do
   next unless node.serverdensity.enabled
   converge_by 'add Server Density alert' do
     alert = device.watch(@new_resource.metadata)

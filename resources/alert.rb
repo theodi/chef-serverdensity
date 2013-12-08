@@ -2,8 +2,8 @@
 # Cookbook Name:: serverdensity
 # Resource:: alert
 
-actions :add
-default_action :add
+actions :create
+default_action :create
 
 # alert name
 attribute :name,

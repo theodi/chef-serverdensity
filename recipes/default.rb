@@ -4,10 +4,6 @@
 
 return unless node.serverdensity.enabled
 
-dpkg_autostart 'sd-agent' do
-  allow false
-end
-
 case node[:platform]
 
   when "debian", "ubuntu"
@@ -21,11 +17,8 @@ case node[:platform]
       action :add
     end
 
-    # Update the local package list
-    execute "serverdensity-apt-get-update" do
-      command "apt-get update"
-      action :nothing
-
+    dpkg_autostart 'sd-agent' do
+      allow false
     end
 
   when "redhat", "centos", "fedora", "scientific", "amazon"

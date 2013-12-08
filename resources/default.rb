@@ -5,6 +5,10 @@
 actions :clear, :configure, :disable, :enable, :setup, :sync, :update
 default_action :update
 
+# account domain
+attribute :account,
+  :kind_of => String
+
 # device name
 attribute :name,
   :kind_of => String,
@@ -12,27 +16,19 @@ attribute :name,
   :required => true
 
 # apiv1 credentials
-attribute :account,
-  :kind_of => String,
-  :name_attribute => true,
-  :default => node.serverdensity.sd_url.sub(/^https?:\/\//, "")
 attribute :username,
-  :kind_of => String,
-  :default => node.serverdensity.username
+  :kind_of => String
 attribute :password,
-  :kind_of => String,
-  :default => node.serverdensity.password
+  :kind_of => String
 
 # apiv2 token
 attribute :token,
-  :kind_of => String,
-  :default => node.serverdensity.token
+  :kind_of => String
 
 # optional agent_key (nil forces refresh)
 attribute :agent_key,
   :kind_of => [String, NilClass],
-  :regex => /^\w{32}$/,
-  :default => node.serverdensity.agent_key
+  :regex => /^\w{32}$/
 
 # optional device identifier (defaults to device name)
 attribute :device,

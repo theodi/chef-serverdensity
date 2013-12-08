@@ -2,12 +2,13 @@
 
 include_recipe "serverdensity"
 
-serverdensity node.name
+serverdensity node.name do
+  action [:update, :clear]
+end
 
 node.serverdensity.alerts.each do | name, alert |
-  Chef::Log.info "Creating Server Density alert name:#{name}"
-  lxc_container name do
-    container.each do |meth, param|
+  serverdensity_alert name do
+    alert.each do |meth, param|
       self.send(meth, param)
     end
     action :create unless alert.has_key?(:action)

@@ -12,7 +12,7 @@ module ServerDensity
       end
 
       def find(device)
-        alerts = API.find_alerts(device)
+        alerts = API.find_alerts(device) || []
         alerts.map { |a| a.extend Base }
       end
     end

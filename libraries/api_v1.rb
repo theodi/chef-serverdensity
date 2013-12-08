@@ -20,7 +20,7 @@ module ServerDensity
       end
 
       def error(err, message)
-        message = "Server Density API error: #{err.response['error']['message']}" rescue message
+        message = "Server Density API error: #{err.response['error']}" rescue message
         Chef::Log.warn(message)
         nil
       end

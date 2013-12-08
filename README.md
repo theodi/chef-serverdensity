@@ -43,8 +43,8 @@ This cookbook has dependencies on the following cookbooks:
 
 ### Basic Config
 
- * `node['serverdensity']['sd_url']` **required**  
-   Your Server Density subdomain, prefixed with either `http://` or `https://`
+ * `node['serverdensity']['account']` **required**  
+   Your Server Density subdomain, i.e. `companyname.serverdensity.io`
  * `node['serverdensity']['agent_key']`  
    Your Server Density agent key (don't set this if you want to use the API to handle querying nodes/creating nodes)
  * `node['serverdensity']['enabled']`  
@@ -67,6 +67,9 @@ If you don't set `agent_key` then set these parameters and new servers will be a
     Your API token from Preferences > Security in Server Density.
 
 ### Optional Advanced Config
+
+ * `node['serverdensity']['sd_url']`  
+   By default this will be "https://#{node.serverdensity.account}", avoid setting manually where possible.
 
  * `node['serverdensity']['device_group']`  
     Sets the group for the device to be created in, to inherit alerts automatically.
@@ -237,6 +240,10 @@ serverdensity node.name do
   metadata :group => 'chef-lwrp'
 end
 ```
+
+##### Settings
+
+Settings is a hash used to override configuration options set in the attributes before the agent config file is written. Take a look at [this template](/templates/default/agent.cfg.erb) to see which settings can be defined.
 
 ### serverdensity_alert
 

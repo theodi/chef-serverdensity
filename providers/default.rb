@@ -26,10 +26,18 @@ action :configure do
   template.path '/etc/sd-agent/config.cfg'
   template.mode 00644
 
-  template.variables Chef::Mixin::DeepMerge.deep_merge(
+  template.variables Chef::Mixin::DeepMerge.merge(
     node.serverdensity.to_hash,
     @new_resource.settings
   )
+
+  if template.variables['sd_url'].nil?
+    if account
+      template.variables['sd_url'] = 'https://' + account
+    else
+      raise "Unable to set sd_url, please supply an account"
+    end
+  end
 
   template.run_action :create
 
@@ -54,10 +62,10 @@ end
 
 action :setup do
   api = case
-    when @new_resource.token
-      ServerDensity::API.configure 2.0, @new_resource.token
-    when @new_resource.username && @new_resource.password
-      ServerDensity::API.configure 1.4, @new_resource.account, @new_resource.username, @new_resource.password
+    when token
+      ServerDensity::API.configure 2.0, token
+    when account && username && password
+      ServerDensity::API.configure 1.4, account, username, password
   end
   @new_resource.updated_by_last_action !api.nil?
 end
@@ -81,6 +89,36 @@ action :update do
   @new_resource.run_action :sync if ServerDensity::API.configured?
 end
 
+# accessors
+
+def account
+  @account ||= @new_resource.account ||
+    node.serverdensity.account ||
+    node.serverdensity.sd_url.sub(/^https?:\/\//, "")
+rescue
+  nil
+end
+
+def agent_key
+  @agent_key ||= @new_resource.agent_key ||
+    node.serverdensity.agent_key ||
+    key_from_file ||
+    key_from_ec2 ||
+    key_from_api
+end
+
+def username
+  @new_resource.username || node.serverdensity.username
+end
+
+def password
+  @new_resource.password || node.serverdensity.password
+end
+
+def token
+  @new_resource.token || node.serverdensity.token
+end
+
 # methods
 
 def define_resource_requirements
@@ -88,11 +126,6 @@ def define_resource_requirements
     a.assertion { ServerDensity::API.configured? }
     a.failure_message Exception, 'Server Density API has not be configured'
   end
-end
-
-def agent_key
-  @agent_key ||= @new_resource.agent_key ||
-    key_from_file || key_from_ec2 || key_from_api
 end
 
 def device
