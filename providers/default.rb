@@ -124,7 +124,7 @@ end
 def define_resource_requirements
   requirements.assert(:clear, :sync) do |a|
     a.assertion { ServerDensity::API.configured? }
-    a.failure_message Exception, 'Server Density API has not be configured'
+    a.failure_message Exception, 'Server Density API has not been configured'
   end
 end
 
