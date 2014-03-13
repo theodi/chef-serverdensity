@@ -71,22 +71,23 @@ action :setup do
 end
 
 action :sync do
-  unless @new_resource.metadata.empty?
-    converge_by "update metadata on Server Density" do
-      @new_resource.updated_by_last_action !device.update(metadata).empty?
-    end if device
-  end
+  converge_by "update metadata on Server Density" do
+    if result = device.update(metadata)
+      @new_resource.updated_by_last_action !result.empty?
+      node.normal.serverdensity.metadata = result.merge(metadata)
+    end
+  end if sync_required? && device
 end
 
 action :update do
-  @new_resource.run_action :setup
   if node.serverdensity.enabled
-    @new_resource.run_action :configure
-    @new_resource.run_action :enable
+    action_setup
+    action_configure
+    action_enable
+    action_sync if ServerDensity::API.configured?
   else
-    @new_resource.run_action :disable
+    action_disable
   end
-  @new_resource.run_action :sync if ServerDensity::API.configured?
 end
 
 # accessors
@@ -124,13 +125,13 @@ end
 def define_resource_requirements
   requirements.assert(:clear, :sync) do |a|
     a.assertion { ServerDensity::API.configured? }
-    a.failure_message Exception, 'Server Density API has not be configured'
+    a.failure_message Exception, 'Server Density API has not been configured'
   end
 end
 
 def device
   return unless ServerDensity::API.configured?
-  @device ||=
+  @device ||= node.normal.serverdensity.metadata =
     ServerDensity::Device.find(@new_resource.device || @new_resource.name) ||
     ServerDensity::Device.create(metadata)
 end
@@ -166,6 +167,12 @@ def service
     provider.load_new_resource_state
     resource
   end
+end
+
+def sync_required?
+  not metadata.reject do |k, v|
+    node.normal.serverdensity.metadata[k] == v
+  end .empty?
 end
 
 def template
