@@ -79,14 +79,14 @@ action :sync do
 end
 
 action :update do
-  @new_resource.run_action :setup
   if node.serverdensity.enabled
-    @new_resource.run_action :configure
-    @new_resource.run_action :enable
+    action_setup
+    action_configure
+    action_enable
+    action_sync if ServerDensity::API.configured?
   else
-    @new_resource.run_action :disable
+    action_disable
   end
-  @new_resource.run_action :sync if ServerDensity::API.configured?
 end
 
 # accessors
