@@ -18,7 +18,7 @@ module ServerDensity
         end
 
         def update_device(device, meta)
-          meta = validate(meta).reject! { |k, v| device[k.to_s] == v }
+          meta = validate(meta).reject { |k, v| device[k.to_s] == v }
           return Hash.new if meta.empty?
           put("/inventory/devices/#{device['_id']}", meta).body
         rescue => err
