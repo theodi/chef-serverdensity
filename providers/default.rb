@@ -142,7 +142,7 @@ end
 
 def key_from_ec2
   if node.attribute?(:ec2)
-    validate RestClient.get('http://169.254.169.254/latest/user-data').split(':').last rescue nil
+    validate node.ec2.userdata.split(':').last rescue nil
   end
 end
 
