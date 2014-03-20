@@ -21,9 +21,9 @@ action :configure do
   end
 
   template.cookbook 'serverdensity'
-  template.source 'config.cfg.erb'
+  template.source 'agent.cfg.erb'
 
-  template.path '/etc/sd-agent/config.cfg'
+  template.path '/etc/sd-agent/conf.d/agent.cfg'
   template.mode 00644
 
   template.variables Chef::Mixin::DeepMerge.merge(

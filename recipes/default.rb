@@ -41,3 +41,9 @@ case node[:platform]
 end
 
 package "sd-agent"
+
+file '/etc/sd-agent/config.cfg' do
+  action :delete
+end
+
+directory '/etc/sd-agent/conf.d'
