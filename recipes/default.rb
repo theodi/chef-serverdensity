@@ -52,3 +52,6 @@ service 'sd-agent' do
 end
 
 directory '/etc/sd-agent/conf.d'
+directory node.serverdensity.plugin_dir do
+  recursive true
+end
