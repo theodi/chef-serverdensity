@@ -2,7 +2,7 @@
 # Cookbook Name:: serverdensity
 # Recipe:: alerts
 
-include_recipe "serverdensity"
+include_recipe 'serverdensity'
 
 serverdensity node.name do
   action [:update, :clear]

@@ -35,7 +35,7 @@ action :configure do
     if account
       template.variables['sd_url'] = 'https://' + account
     else
-      raise "Unable to set sd_url, please supply an account"
+      raise 'Unable to set sd_url, please supply an account'
     end
   end
 
@@ -71,7 +71,7 @@ action :setup do
 end
 
 action :sync do
-  converge_by "update metadata on Server Density" do
+  converge_by 'update metadata on Server Density' do
     if result = device.update(metadata)
       @new_resource.updated_by_last_action !result.empty?
       node.normal.serverdensity.metadata = result.merge(metadata)
@@ -95,7 +95,7 @@ end
 def account
   @account ||= @new_resource.account ||
     node.serverdensity.account ||
-    node.serverdensity.sd_url.sub(/^https?:\/\//, "")
+    node.serverdensity.sd_url.sub(/^https?:\/\//, '')
 rescue
   nil
 end

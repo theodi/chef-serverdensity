@@ -21,7 +21,7 @@ module ServerDensity
             when :name then '/devices/getByName'
             when :hostName then '/devices/getByHostName'
             else
-              Chef::Log.warn("Server Density v1 only supports searching using name or hostname")
+              Chef::Log.warn('Server Density v1 only supports searching using name or hostname')
               return nil
           end
           convert_device get(endpoint, :params => meta).body['data']['device']
