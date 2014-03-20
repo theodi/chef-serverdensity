@@ -46,4 +46,9 @@ file '/etc/sd-agent/config.cfg' do
   action :delete
 end
 
+service 'sd-agent' do
+  supports [:start, :stop, :restart]
+  action :nothing
+end
+
 directory '/etc/sd-agent/conf.d'
