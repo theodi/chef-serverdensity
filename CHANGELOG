@@ -1,6 +1,10 @@
 ChangeLog for chef-serverdensity
 ================================
 
+2.0.0 (20-03-2014)
+------------------
+ - Revamped entire recipe. See https://github.com/serverdensity/chef-serverdensity/pull/5 for full changelog. Note supports non-LWRP based usage, but does introduce breaking changes hence the version bump.
+
 1.0.1 (17-09-2013)
 ------------------
 
