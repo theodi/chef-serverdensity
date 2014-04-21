@@ -3,5 +3,5 @@
 # Recipe:: uninstall
 
 package "sd-agent" do
-  action :uninstall
+  action :remove
 end
