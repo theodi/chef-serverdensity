@@ -37,7 +37,9 @@ This cookbook has dependencies on the following cookbooks:
 
   3. Call the LWRP as described [below](#lwrp) to dynamically configure `sd-agent`
 
-  4. Call the `serverdensity_alert` [LWRP](#serverdensity_alert) to configure custom alerts
+  4. Call the `serverdensity_plugin` [LWRP](#serverdensity_plugin) to configure plugins
+
+  5. Call the `serverdensity_alert` [LWRP](#serverdensity_alert) to configure custom alerts
 
 ## Attributes
 
@@ -118,8 +120,9 @@ If you don't set `agent_key` then set these parameters and new servers will be a
 
  * `node['serverdensity']['plugin_dir']`  
     Sets the directory the agent looks for plugins, if left blank it is ignored
- * `node['serverdensity']['plugin_options']`  
-    A hash of optional named plugin options if you have agent plugins you want to configure, simple key-values will be added to the `[Main]` section of the config while sub-hashes will be generated into sections e.g. `{"Beanstalk"=>{"host"=>"localhost"}}` becomes:
+ * `node['serverdensity']['plugin_options']` **deprecated**  
+    _Use the [plugin LWRP](#serverdensity_plugin) where possible, this exists for legacy reasons only._  
+    A hash of optional named plugin options if you have agent plugins you want to configure, simple key-values will be added to the `[Main]` section of the config while sub-hashes will be generated into sections e.g. `{'Beanstalk'=>{'host'=>'localhost'}}` becomes:
 
 ```ini
 [Beanstalk]
@@ -245,7 +248,7 @@ end
 
 Settings is a hash used to override configuration options set in the attributes before the agent config file is written. Take a look at [this template](/templates/default/agent.cfg.erb) to see which settings can be defined.
 
-### serverdensity_alert
+### serverdensity\_alert
 
 This is used to create alerts for your newly minted device, it currently just acts as a wrapper for API calls and as such, v1 and v2 usage is significantly different, the hope is to give them a shared DSL in the future.
 
@@ -255,7 +258,7 @@ This is used to create alerts for your newly minted device, it currently just ac
 
 ```rb
 # create v1 alert (https://github.com/serverdensity/sd-api-docs/blob/master/sections/alerts.md#add)
-serverdensity_alert "high-cpu" do
+serverdensity_alert 'high-cpu' do
   metadata(
     :userId => ['group'],
     :notificationType => ['email'],
@@ -273,12 +276,39 @@ end
 
 ```rb
 # create v2 alert
-serverdensity_alert "high-cpu" do
+serverdensity_alert 'high-cpu' do
   metadata(
     # params as described here https://apidocs.serverdensity.com/Alerts/Alert_Configs/Creating
   )
 end
 ```
+
+### serverdensity\_plugin
+
+This is used to install and configure plugins, it creates a new plugin config file inside `/etc/sd-agent/conf.d` and symlinks the file specified in `path` to the `plugin_dir`. Currently plugins must be placed on the server outside of this LWRP and then referenced (with `path`). A future goal is to allow plugin installation directly via 
+[plugins.serverdensity.com](https://plugins.serverdensity.com/).
+
+#### API (both versions)
+
+```rb
+# install Supervisord plugin, configure it, and restart the sd-agent
+serverdensity_plugin 'Supervisord' do
+  path '/opt/my-company/sd-plugins/Supervisord.py'
+  config(
+    rpc_url: 'unix:///var/run/supervisor.sock'
+  )
+  notifies :restart, 'service[sd-agent]'
+end
+```
+
+The config file will namespace configurations so that they do not clash between plugins. The example above would produce the following config file:
+
+```ini
+[Supervisord]
+rpc_url = unix:///var/run/supervisor.sock
+```
+
+**IMPORTANT**: Some older plugins may require global settings, if this is the case it is possible to use the `plugin_options` attribute to set these, however it is recommended to upgrade the plugin where possible.
 
 ## Notes
 
