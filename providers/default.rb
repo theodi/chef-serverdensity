@@ -161,7 +161,16 @@ def metadata
     group: node.serverdensity.device_group || 'chef-autodeploy',
     hostname: node.hostname,
     name: @new_resource.name
-  }.merge @new_resource.metadata
+  }.merge(provider).merge(@new_resource.metadata)
+end
+
+def provider
+  @provider ||= case true
+    when node.key?(:ec2) && node.ec2.key?(:instance_id)
+      { provider: 'amazon', providerId: node.ec2.instance_id }
+    else
+      {}
+  end
 end
 
 def service
