@@ -23,7 +23,6 @@ action :configure do
   template.cookbook 'serverdensity'
   template.source 'agent.cfg.erb'
 
-  template.path '/etc/sd-agent/conf.d/agent.cfg'
   template.mode 00644
 
   template.variables Chef::Mixin::DeepMerge.merge(
@@ -40,6 +39,9 @@ action :configure do
   end
 
   template.run_action :create
+
+  link.to template.path
+  link.run_action :create
 
   @new_resource.updated_by_last_action template.updated_by_last_action?
 end
@@ -150,6 +152,10 @@ def key_from_file
   validate ::File.read '/etc/sd-agent-key' if ::File::exist? '/etc/sd-agent-key'
 end
 
+def link
+  @link ||= Chef::Resource::Link.new('/etc/sd-agent/config.cfg', run_context)
+end
+
 def metadata
   @metadata ||= {
     group: node.serverdensity.device_group || 'chef-autodeploy',
@@ -160,8 +166,7 @@ end
 
 def service
   @service ||= begin
-    resource = Chef::Resource::Service.new(@new_resource.name, run_context)
-    resource.service_name 'sd-agent'
+    resource = Chef::Resource::Service.new('sd-agent', run_context)
     provider = resource.provider_for_action(:enable)
     provider.load_current_resource
     provider.load_new_resource_state
@@ -176,7 +181,10 @@ def sync_required?
 end
 
 def template
-  @template ||= Chef::Resource::Template.new(@new_resource.name, run_context)
+  @template ||= Chef::Resource::Template.new(
+    '/etc/sd-agent/conf.d/agent.cfg',
+    run_context
+  )
 end
 
 def validate(key)
