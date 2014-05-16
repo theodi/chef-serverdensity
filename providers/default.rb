@@ -21,9 +21,8 @@ action :configure do
   end
 
   template.cookbook 'serverdensity'
-  template.source 'config.cfg.erb'
+  template.source 'agent.cfg.erb'
 
-  template.path '/etc/sd-agent/config.cfg'
   template.mode 00644
 
   template.variables Chef::Mixin::DeepMerge.merge(
@@ -35,11 +34,14 @@ action :configure do
     if account
       template.variables['sd_url'] = 'https://' + account
     else
-      raise "Unable to set sd_url, please supply an account"
+      raise 'Unable to set sd_url, please supply an account'
     end
   end
 
   template.run_action :create
+
+  link.to template.path
+  link.run_action :create
 
   @new_resource.updated_by_last_action template.updated_by_last_action?
 end
@@ -71,7 +73,7 @@ action :setup do
 end
 
 action :sync do
-  converge_by "update metadata on Server Density" do
+  converge_by 'update metadata on Server Density' do
     if result = device.update(metadata)
       @new_resource.updated_by_last_action !result.empty?
       node.normal.serverdensity.metadata = result.merge(metadata)
@@ -95,7 +97,7 @@ end
 def account
   @account ||= @new_resource.account ||
     node.serverdensity.account ||
-    node.serverdensity.sd_url.sub(/^https?:\/\//, "")
+    node.serverdensity.sd_url.sub(/^https?:\/\//, '')
 rescue
   nil
 end
@@ -142,7 +144,7 @@ end
 
 def key_from_ec2
   if node.attribute?(:ec2)
-    validate RestClient.get('http://169.254.169.254/latest/user-data').split(':').last rescue nil
+    validate node.ec2.userdata.split(':').last rescue nil
   end
 end
 
@@ -150,18 +152,30 @@ def key_from_file
   validate ::File.read '/etc/sd-agent-key' if ::File::exist? '/etc/sd-agent-key'
 end
 
+def link
+  @link ||= Chef::Resource::Link.new('/etc/sd-agent/config.cfg', run_context)
+end
+
 def metadata
   @metadata ||= {
     group: node.serverdensity.device_group || 'chef-autodeploy',
     hostname: node.hostname,
     name: @new_resource.name
-  }.merge @new_resource.metadata
+  }.merge(provider).merge(@new_resource.metadata)
+end
+
+def provider
+  @provider ||= case true
+    when node.key?(:ec2) && node.ec2.key?(:instance_id)
+      { provider: 'amazon', providerId: node.ec2.instance_id }
+    else
+      {}
+  end
 end
 
 def service
   @service ||= begin
-    resource = Chef::Resource::Service.new(@new_resource.name, run_context)
-    resource.service_name 'sd-agent'
+    resource = Chef::Resource::Service.new('sd-agent', run_context)
     provider = resource.provider_for_action(:enable)
     provider.load_current_resource
     provider.load_new_resource_state
@@ -176,7 +190,10 @@ def sync_required?
 end
 
 def template
-  @template ||= Chef::Resource::Template.new(@new_resource.name, run_context)
+  @template ||= Chef::Resource::Template.new(
+    '/etc/sd-agent/conf.d/agent.cfg',
+    run_context
+  )
 end
 
 def validate(key)

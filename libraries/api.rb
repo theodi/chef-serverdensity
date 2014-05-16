@@ -8,7 +8,7 @@ module ServerDensity
     class << self
       def configure(version, *args)
         if configured?
-          Chef::Log.warn("Server Density API has already been configured")
+          Chef::Log.warn('Server Density API has already been configured')
           false
         else
           case version.to_i

@@ -11,7 +11,7 @@ default['serverdensity']['password'] = nil
 
 default['serverdensity']['device_group'] = nil
 
-default['serverdensity']['plugin_dir'] = nil
+default['serverdensity']['plugin_dir'] = '/opt/sd-agent/plugins'
 default['serverdensity']['plugin_options'] = {}
 
 default['serverdensity']['apache_status_url'] = nil

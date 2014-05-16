@@ -72,7 +72,7 @@ module ServerDensity
 
       def update(meta)
         diff = API.update_device(self, meta)
-        self.merge! diff
+        self.merge! diff if diff
         diff
       end
 
