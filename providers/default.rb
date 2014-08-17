@@ -168,6 +168,8 @@ def provider
   @provider ||= case true
     when node.key?(:ec2) && node.ec2.key?(:instance_id)
       { provider: 'amazon', providerId: node.ec2.instance_id }
+    when node.key?(:instance) && node.instance.key?(:aws_instance_id)
+      { provider: 'amazon', providerId: node.instance.aws_instance_id }
     else
       {}
   end
