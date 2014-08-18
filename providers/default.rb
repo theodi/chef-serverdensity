@@ -134,8 +134,7 @@ end
 def device
   return unless ServerDensity::API.configured?
   @device ||= node.normal.serverdensity.metadata =
-    ServerDensity::Device.find(@new_resource.device || @new_resource.name) ||
-    ServerDensity::Device.find(provider) ||
+    ServerDensity::Device.find(provider.presence || @new_resource.device || @new_resource.name) ||
     ServerDensity::Device.create(metadata)
 end
 
@@ -169,8 +168,8 @@ def provider
   @provider ||= case true
     when node.key?(:ec2) && node.ec2.key?(:instance_id)
       { provider: 'amazon', providerId: node.ec2.instance_id }
-    when node.key?(:instance) && node.instance.key?(:aws_instance_id)
-      { provider: 'amazon', providerId: node.instance.aws_instance_id }
+    when node.key?(:opsworks) && node.opsworks.key?(:instance) && node.opsworks.instance.key?(:aws_instance_id)
+      { provider: 'amazon', providerId: node.opsworks.instance.aws_instance_id }
     else
       {}
   end
