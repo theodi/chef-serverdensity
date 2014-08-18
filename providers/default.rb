@@ -135,6 +135,7 @@ def device
   return unless ServerDensity::API.configured?
   @device ||= node.normal.serverdensity.metadata =
     ServerDensity::Device.find(@new_resource.device || @new_resource.name) ||
+    ServerDensity::Device.find(provider) ||
     ServerDensity::Device.create(metadata)
 end
 
