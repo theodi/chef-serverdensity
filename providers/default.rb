@@ -133,8 +133,13 @@ end
 
 def device
   return unless ServerDensity::API.configured?
+  query = if provider.empty?
+    @new_resource.device || @new_resource.name
+  else
+    provider
+  end
   @device ||= node.normal.serverdensity.metadata =
-    ServerDensity::Device.find(provider.presence || @new_resource.device || @new_resource.name) ||
+    ServerDensity::Device.find(query) ||
     ServerDensity::Device.create(metadata)
 end
 
