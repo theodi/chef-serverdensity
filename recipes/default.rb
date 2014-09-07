@@ -44,6 +44,7 @@ package 'sd-agent'
 
 file '/etc/sd-agent/config.cfg' do
   action :delete
+  not_if { ::File.symlink?(path) }
 end
 
 service 'sd-agent' do

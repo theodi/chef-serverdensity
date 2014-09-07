@@ -170,10 +170,10 @@ def metadata
 end
 
 def provider
-  @provider ||= case true
-    when node.key?(:ec2) && node.ec2.key?(:instance_id)
+  @provider ||= case
+    when (node.ec2.instance_id rescue false)
       { provider: 'amazon', providerId: node.ec2.instance_id }
-    when node.key?(:opsworks) && node.opsworks.key?(:instance) && node.opsworks.instance.key?(:aws_instance_id)
+    when (node.opsworks.instance.aws_instance_id rescue false)
       { provider: 'amazon', providerId: node.opsworks.instance.aws_instance_id }
     else
       {}
