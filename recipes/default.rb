@@ -22,20 +22,11 @@ case node[:platform]
     end
 
   when 'redhat', 'centos', 'fedora', 'scientific', 'amazon'
-    include_recipe 'yum::epel'
-
-    yum_key 'RPM-GPG-KEY-serverdensity' do
-      url 'https://www.serverdensity.com/downloads/boxedice-public.key'
-      action :add
-    end
 
     yum_repository 'serverdensity' do
-      name 'serverdensity'
       description 'Server Density sd-agent'
-      url 'https://www.serverdensity.com/downloads/linux/redhat/'
-      key 'RPM-GPG-KEY-serverdensity'
-      enabled 1
-      action :add
+      baseurl 'https://www.serverdensity.com/downloads/linux/redhat/'
+      gpgkey 'https://www.serverdensity.com/downloads/boxedice-public.key'
     end
 
 end

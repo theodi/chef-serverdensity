@@ -6,8 +6,8 @@ description        'Installs/configures Server Density sd-agent'
 long_description   IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version            '2.0.0'
 
-depends 'apt'
-depends 'yum'
+depends 'apt', '~> 2.6'
+depends 'yum', '~> 3.3'
 depends 'dpkg_autostart', '~> 0.1.6'
 
 supports 'ubuntu'
