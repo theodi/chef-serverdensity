@@ -314,6 +314,13 @@ rpc_url = unix:///var/run/supervisor.sock
 
 As this cookbook depends on a few [other cookbooks](#cookbooks) it's recommended you use a library like [Berkshelf](http://berkshelf.com/), [librarian-chef](https://github.com/applicationsonline/librarian-chef) or [knife-github-cookbooks](https://github.com/websterclay/knife-github-cookbooks) to automatically manage and install them.
 
+## Publishing on the Chef Supermarket
+
+https://supermarket.getchef.com/cookbooks/serverdensity
+
+# Clone the repo to `~/Desktop/serverdensity`
+# From CWD `~/Desktop` run `knife cookbook site share serverdensity "Monitoring & Trending" --cookbook-path ~/Desktop`
+
 ## References
 
   * [Server Density home page](http://www.serverdensity.com/)
