@@ -318,8 +318,8 @@ As this cookbook depends on a few [other cookbooks](#cookbooks) it's recommended
 
 https://supermarket.getchef.com/cookbooks/serverdensity
 
-# Clone the repo to `~/Desktop/serverdensity`
-# From CWD `~/Desktop` run `knife cookbook site share serverdensity "Monitoring & Trending" --cookbook-path ~/Desktop`
+1. Clone the repo to `~/Desktop/serverdensity`
+2. From CWD `~/Desktop` run `knife cookbook site share serverdensity "Monitoring & Trending" --cookbook-path ~/Desktop`
 
 ## References
 
