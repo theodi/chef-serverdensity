@@ -1,6 +1,17 @@
 ChangeLog for chef-serverdensity
 ================================
 
+2.1.0 (10-10-2014)
+------------------
+ - Added support for managing plugins
+ - Move agent config to `/etc/sd-agent/conf.d/agent.cfg` an updated template
+ - Improved support for AWS EC2 linking with Server Density cloud support
+ - Added :remove and :purge options for removing the agent
+ - Support for AWS OpsWorks
+ - Improved docs
+ - Various performance improvements
+ - Various bug fixes
+
 2.0.0 (20-03-2014)
 ------------------
  - Revamped entire recipe. See https://github.com/serverdensity/chef-serverdensity/pull/5 for full changelog. Note supports non-LWRP based usage, but does introduce breaking changes hence the version bump.
